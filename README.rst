@@ -9,7 +9,7 @@ Double Decoupling Method (DDM)
 .. .. image:: https://img.shields.io/travis/donadef/ddm.svg
         :target: https://travis-ci.org/donadef/ddm
 
- .. image:: https://readthedocs.org/projects/ddm/badge/?version=latest
+.. image:: https://readthedocs.org/projects/ddm/badge/?version=latest
         :target: https://ddm.readthedocs.io/en/latest/?badge=latest
         :alt: Documentation Status
 
