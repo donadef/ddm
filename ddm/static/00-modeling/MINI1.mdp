@@ -1,0 +1,25 @@
+; Run parameters
+integrator	        = steep         	; minimization with steepest descent method
+emtol                   = 10            	; stop minimization when the maximum force < 10.0 kJ/mol/nm
+emstep                  = 0.01          	; energy step size
+nsteps                  = 10000         	; maximum number of (minimization) steps to perform
+continuation            = no			; first dynamics run?
+; Output control
+nstxout		        = 1  			; save coordinates every 1 step
+nstenergy	        = 1  			; save energies every 1 step
+nstlog		        = 1  			; update log file every 1 step
+; Bond parameters
+constraints	        = none   		; h-bonds constrained
+; Neighbor searching
+cutoff-scheme           = group         	; scheme to make the neighbor searching
+ns_type		        = grid			; search neighboring grid cells
+nstlist		        = 0     		; 0 fs, largely irrelevant with Verlet
+rlist		        = 0.0			; Distance to make the neighbor searching
+; Electrostatics interactions
+coulombtype             = cut-off       	; PME for treating electrostatic 
+rcoulomb	        = 0.0			; short-range electrostatic cutoff (in nm)
+; Vdw interactions 
+vdw-type                = cut-off       	; PME for computing van der waals interactions
+rvdw		        = 0.0			; short-range van der Waals cutoff (in nm)
+; Periodic boundary conditions
+pbc		        = no             	; 3-D PBC

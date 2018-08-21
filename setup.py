@@ -11,7 +11,7 @@ with open('README.rst') as readme_file:
 with open('HISTORY.rst') as history_file:
     history = history_file.read()
 
-requirements = ['Click>=6.0', ]
+requirements = ['Click>=6.0', 'pip==9.0.1', 'flake8==3.5.0', 'coverage==4.5.1', 'Sphinx==1.7.1']
 
 setup_requirements = ['pytest-runner', ]
 
@@ -36,7 +36,7 @@ setup(
     description="ddm allows binding free energy for a complex, using the double decoupling method.",
     entry_points={
         'console_scripts': [
-            'ddm=ddm.cli:main',
+            'ddm=ddm.ddm_cli:main',
         ],
     },
     install_requires=requirements,

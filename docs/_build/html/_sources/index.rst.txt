@@ -1,5 +1,5 @@
 Welcome to Double Decoupling Method (DDM)'s documentation!
-======================================
+==========================================================
 
 .. toctree::
    :maxdepth: 2
@@ -8,10 +8,10 @@ Welcome to Double Decoupling Method (DDM)'s documentation!
    readme
    installation
    usage
-   modules
    contributing
    authors
    history
+.. modules
 
 Indices and tables
 ==================

@@ -1,0 +1,14 @@
+; Defining the main source of the force field parameters 
+#include "charmm36-jul2017.ff/forcefield.itp"
+; Additional parameters for the molecules
+#include "XXXXX.prm"
+; Additional topology for the molecules
+#include "XXXXX.itp"
+
+[ system ]
+; Name
+Ligand XXXXX in vacuum
+
+[ molecules ]
+; Compound        #mols
+XXXXX             1

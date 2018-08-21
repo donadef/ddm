@@ -1,0 +1,30 @@
+; Defining the main source of the force field parameters 
+#include "charmm36-jul2017.ff/forcefield.itp"
+; Additional parameters for the molecules
+#include "XXXXX.prm"
+#include "YYYYY.prm"
+; Additional topology for the molecules
+#include "XXXXX.itp"
+; Solute position restraints
+#ifdef POSRES
+#include "XXXXX-posre.itp"
+#endif
+#include "YYYYY.itp"
+; Solute position restraints
+#ifdef POSRES
+#include "YYYYY-posre.itp"
+#endif
+
+; Include topology for tp3p water model
+#include "charmm36-jul2017.ff/tip3p.itp"
+
+[ system ]
+; Name
+Complex XXXXX-YYYYY in vacuum
+
+[ molecules ]
+; Compound        #mols
+XXXXX             1
+YYYYY             1
+SOL           ZZZZZ
+
