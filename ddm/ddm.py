@@ -1,27 +1,28 @@
 # -*- coding: utf-8 -*-
 import configparser
 import os
+
 from classes.modeling import Modeling
-from classes.solvate_bound import SolvateBound
+from classes.solvate import SolvateBound, SolvateUnbound
+
 
 class DDM:
-    def __init__(self, config, complex):
+    def __init__(self, config_file, complex_file):
         self.config = configparser.ConfigParser()
-        self.config.read(config)
+        self.config.read(config_file)
 
-        self.host = self.config['main']['host']
-        self.guest = self.config['main']['guest']
-        self.dest = self.config['main']['dest']
-
-        self.complex = complex
-        self.ipdb = os.path.basename(self.complex).rstrip('.pdb')
-
-        self.static_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'ddm/static')
+        self.complex = complex_file
 
     def perform_ddm(self):
         # First step : prepare the host, guest and complex.
-        # m = Modeling(self.host, self.guest, self.complex, self.ipdb, self.dest, self.static_dir)
-        # m.run()
+        m = Modeling(self.config, self.complex)
+        m.run()
 
-        sb = SolvateBound(self.host, self.guest, self.complex, self.ipdb, self.dest, self.static_dir)
+        sb = SolvateBound(self.config, self.complex)
         sb.run()
+
+        su = SolvateUnbound(self.config, self.complex)
+        su.run()
+
+
+

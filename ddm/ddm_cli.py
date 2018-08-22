@@ -9,10 +9,12 @@ from ddm import DDM
 @click.option('--config',
               help='Your config file. See the docs for an example: https://ddm.readthedocs.io ',
               # prompt=True,
-              type=click.Path(exists=True, allow_dash=True))
+              type=click.Path(exists=True, allow_dash=True),
+              required=True)
 @click.option('--complex',
               help='The pbd file of the complex you want to study.',
-              type=click.Path(exists=True, allow_dash=True))
+              type=click.Path(exists=True, allow_dash=True),
+              required=True)
 @click.version_option(version='0.1.0')
 def main(config, complex):
     """Console script for ddm."""

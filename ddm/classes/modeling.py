@@ -2,19 +2,16 @@
 import os
 import shutil
 import subprocess
+
 from tools import cgenff_charmm2gmx
+from .base import DDMClass
 
 
-class Modeling:
-    def __init__(self, host, guest, complex, ipdb, dest, static_dir):
-        self.host = host
-        self.guest = guest
-        self.complex = complex
-        self.ipdb = ipdb
-        self.dest = dest
-        self.static_dir = static_dir
-
+class Modeling(DDMClass):
+    def __init__(self, config, complex):
+        super(Modeling, self).__init__(config, complex)
         self.directory = os.path.join(self.dest, '00-modeling')
+        self.static_dir = os.path.join(self.static_dir, '00-modeling')
 
     def run(self):
         if not os.path.exists(self.directory):
@@ -35,19 +32,10 @@ class Modeling:
         # Complex
         self.minimize_complex()
 
-        files_to_store = [self.guest + '.top', self.guest + '.prm', self.guest + '.itp', self.guest + '_ini.pdb', 'topol-ligand.top',
+        files_to_store = [self.guest + '.top', self.guest + '.prm', self.guest + '.itp', self.guest + '_ini.pdb', 'topol-ligand.top', 'ligand_mini.pdb',
                           self.host + '.top', self.host + '.prm', self.host + '.itp', self.host + '_ini.pdb',
                           'complex_mini.pdb', 'topol-complex.top']
-        store_dir = os.path.join(self.directory, 'STORE')
-        if not os.path.exists(store_dir):
-            os.makedirs(store_dir)
-
-        for file in files_to_store:
-            try:
-                shutil.copy(file, store_dir)
-            except FileNotFoundError:
-                print('File ' + file + ' has not been created.')
-                exit()
+        self.store_files(files_to_store)
 
     def prepare_guest(self):
         # PDB file for the guest, extract from the complex given as input.
@@ -58,67 +46,73 @@ class Modeling:
             self.generate_param_files(self.guest)
 
     def minimize_guest(self):
-        if not os.path.isfile(os.path.join(self.directory, 'topol-ligand.top')):
-            # create the topol-ligand.top file
-            f = open(os.path.join(self.static_dir, '00-modeling/ligand.top'), 'r')
-            filedata = f.read()
-            f.close()
-
-            newdata = filedata.replace("XXXXX", self.guest)
-
-            f = open(os.path.join(self.directory, 'topol-ligand.top'), 'w')
-            f.write(newdata)
-            f.close()
-
-        # First minimization step, steepest descent method.
-        if not os.path.isfile(os.path.join(self.directory, 'mini1.trr')):
-            self.minimize1(self.guest + '_ini', 'topol-ligand')
-
-        # Second minimization step, conjugate gradient method.
-        if not os.path.isfile(os.path.join(self.directory, 'mini2.trr')):
-            self.minimize2(self.guest + '_ini', 'topol-ligand')
-
-        # Extract coordinates
         if not os.path.isfile(os.path.join(self.directory, 'ligand_mini.pdb')):
+            if not os.path.isfile(os.path.join(self.directory, 'topol-ligand.top')):
+                # create the topol-ligand.top file
+                f = open(os.path.join(self.static_dir, 'ligand.top'), 'r')
+                filedata = f.read()
+                f.close()
+
+                newdata = filedata.replace("XXXXX", self.guest)
+
+                f = open(os.path.join(self.directory, 'topol-ligand.top'), 'w')
+                f.write(newdata)
+                f.close()
+
+            # First minimization step, steepest descent method.
+            if not os.path.isfile(os.path.join(self.directory, 'mini1.trr')):
+                self.minimize1(self.guest + '_ini', 'topol-ligand')
+
+            # Second minimization step, conjugate gradient method.
+            if not os.path.isfile(os.path.join(self.directory, 'mini2.trr')):
+                self.minimize2('topol-ligand')
+
+            # Extract coordinates
             if not os.path.isfile(os.path.join(self.directory, 'TMP')):
-                self.minimize2(self.guest + '_ini', 'topol-ligand')
+                self.minimize2('topol-ligand')
             self.extract_coordinates('ligand_mini')
+
+            self.clean_md_files()
+            self.clean_tmp()
 
     def prepare_host(self):
         # PDB file for the host, extract from the complex given as input.
-        if not os.path.isfile(os.path.join(self.directory, self.guest + '.pdb')):
-            subprocess.call('grep " ' + self.host + ' " ' + self.ipdb + '.pdb' + ' > ' + os.path.join(self.directory, self.guest + '.pdb'),
+        if not os.path.isfile(os.path.join(self.directory, self.host + '.pdb')):
+            subprocess.call('grep " ' + self.host + ' " ' + self.ipdb + '.pdb' + ' > ' + os.path.join(self.directory, self.host + '.pdb'),
                             shell=True)
         if not os.path.isfile(os.path.join(self.directory, self.host + '.top')):
             self.generate_param_files(self.host)
 
     def minimize_complex(self):
-        if not os.path.isfile(os.path.join(self.directory, 'topol-complex.top')):
-            # create the topol-complex.top file
-            f = open(os.path.join(self.static_dir, '00-modeling/complex.top'), 'r')
-            filedata = f.read()
-            f.close()
-
-            newdata1 = filedata.replace('XXXXX', self.host)
-            newdata2 = newdata1.replace('YYYYY', self.guest)
-
-            f = open(os.path.join(self.directory, 'topol-complex.top'), 'w')
-            f.write(newdata2)
-            f.close()
-
-        # First minimization step, steepest descent method.
-        if not os.path.isfile(os.path.join(self.directory, 'mini1.trr')):
-            self.minimize1(self.ipdb, 'topol-complex')
-
-        # Second minimization step, conjugate gradient method.
-        if not os.path.isfile(os.path.join(self.directory, 'mini2.trr')):
-            self.minimize2('topol-complex')
-
-        # Extract coordinates
         if not os.path.isfile(os.path.join(self.directory, 'complex_mini.pdb')):
+            if not os.path.isfile(os.path.join(self.directory, 'topol-complex.top')):
+                # create the topol-complex.top file
+                f = open(os.path.join(self.static_dir, 'complex.top'), 'r')
+                filedata = f.read()
+                f.close()
+
+                newdata = filedata.replace('XXXXX', self.host)
+                newdata = newdata.replace('YYYYY', self.guest)
+
+                f = open(os.path.join(self.directory, 'topol-complex.top'), 'w')
+                f.write(newdata)
+                f.close()
+
+            # First minimization step, steepest descent method.
+            if not os.path.isfile(os.path.join(self.directory, 'mini1.trr')):
+                self.minimize1(self.ipdb, 'topol-complex')
+
+            # Second minimization step, conjugate gradient method.
+            if not os.path.isfile(os.path.join(self.directory, 'mini2.trr')):
+                self.minimize2('topol-complex')
+
+            # Extract coordinates
             if not os.path.isfile(os.path.join(self.directory, 'TMP')):
                 self.minimize2('topol-complex')
             self.extract_coordinates('complex_mini')
+
+            self.clean_md_files()
+            self.clean_tmp()
 
     def generate_param_files(self, who):
         subprocess.call('babel -ipdb ' + who + '.pdb -omol2 ' + who + '.mol2 --title ' + who,
@@ -142,15 +136,15 @@ class Modeling:
         os.rename(who.lower() + '_ini.pdb', who + '_ini.pdb')
 
     def minimize1(self, pdb, top):
-        subprocess.call('gmx grompp -f ' + os.path.join(self.static_dir, '00-modeling/MINI1.mdp') + ' -c ' + pdb + '.pdb -p ' + top + '.top -o mini1.tpr -maxwarn 2',
+        subprocess.call('gmx grompp -f ' + os.path.join(self.static_dir, 'MINI1.mdp') + ' -c ' + pdb + '.pdb -p ' + top + '.top -o mini1.tpr -maxwarn 2',
                         shell=True)
-        subprocess.call('gmx mdrun -v -deffnm mini1',
+        subprocess.call('gmx_d mdrun -v -deffnm mini1',
                         shell=True)
 
     def minimize2(self, top):
-        subprocess.call('gmx_d grompp -f ' + os.path.join(self.static_dir, '00-modeling/MINI2.mdp') + ' -c mini1.gro -p ' + top + '.top -o mini2.tpr -maxwarn 2',
+        subprocess.call('gmx grompp -f ' + os.path.join(self.static_dir, 'MINI2.mdp') + ' -c mini1.gro -p ' + top + '.top -o mini2.tpr -maxwarn 2',
                         shell=True)
-        subprocess.call('gmx mdrun -v -deffnm mini2 > TMP 2>&1',
+        subprocess.call('gmx_d mdrun -v -deffnm mini2 > TMP 2>&1',
                         shell=True)
 
     def extract_coordinates(self, pdb):
@@ -160,5 +154,3 @@ class Modeling:
         # Extract the coordinate for the last step
         subprocess.call('echo "0" | gmx trjconv -f mini2.trr -s mini2.tpr -o ' + pdb + '.pdb -b ' + nstep,
                         shell=True)
-        # clean
-        os.remove(os.path.join(self.directory, 'TMP'))

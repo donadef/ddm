@@ -1,0 +1,35 @@
+define		        = -DPOSRES		; position restrain
+; Run parameters
+integrator	        = steep         	; minimization with steppend descent method
+emtol                   = 100.0         	; stop minimization when the maximum force < 100.0 kJ/mol/nm
+emstep                  = 0.01          	; energy step size
+nsteps                  = 10000         	; maximum number of (minimization) steps to perform
+continuation            = no			; first dynamics run?
+; Output control
+nstxout		        = 1  			; save coordinates every 1 step
+nstenergy	        = 1  			; save energies every 1 step
+nstlog		        = 1  			; update log file every 1 step
+; Bond parameters
+constraints	        = h-bonds		; h-bonds constrained
+constraint_algorithm    = lincs	        	; holonomic constraints 
+lincs_iter	        = 1	        	; accuracy of LINCS
+lincs_order	        = 4	        	; also related to accuracy
+; Neighbor searching
+cutoff-scheme           = Verlet        	; scheme to make the neighbor searching
+ns_type		        = grid			; search neighboring grid cells
+nstlist		        = 20			; 20 fs, largely irrelevant with Verlet
+; Electrostatics interactions
+coulombtype             = PME           	; PME for treating electrostatic 
+rcoulomb	        = 1.00			; short-range electrostatic cutoff (in nm)
+; Vdw interactions 
+vdw-type                = PME           	; PME for computing van der waals interactions
+rvdw		        = 1.00			; short-range van der Waals cutoff (in nm)
+; PME details 
+fourierspacing          = 0.12          	; grid spacing for FFT
+pme_order               = 4            		; Spline order of 4
+ewald_rtol              = 1e-06         	; Tolerance of 1e-06 for PME in electrostatics
+ewald_rtol-lj           = 1e-06         	; Tolerance of 1e-06 for PME in VdW
+; Dispersion correction
+DispCorr	        = EnerPres		; account for cut-off vdW scheme
+; Periodic boundary conditions
+pbc		        = xyz	        	; 3-D PBC
