@@ -4,6 +4,9 @@ import os
 
 from classes.modeling import Modeling
 from classes.solvate import SolvateBound, SolvateUnbound
+from classes.reference import PickReference
+from classes.monitor import MonitorCVs
+from classes.confine import ConfineBound
 
 
 class DDM:
@@ -24,5 +27,11 @@ class DDM:
         su = SolvateUnbound(self.config, self.complex)
         su.run()
 
+        ref = PickReference(self.config, self.complex)
+        ref.run()
 
+        mon = MonitorCVs(self.config, self.complex)
+        mon.run()
 
+        cf = ConfineBound(self.config, self.complex)
+        cf.run()

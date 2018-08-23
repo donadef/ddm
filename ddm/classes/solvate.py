@@ -3,7 +3,7 @@ import os
 import shutil
 import subprocess
 
-from .base import DDMClass
+from .base import DDMClass, clean_md_files, clean_tmp
 
 
 class Solvate(DDMClass):
@@ -47,7 +47,7 @@ class Solvate(DDMClass):
 
         nwat = subprocess.check_output("grep 'Number of SOL' TMP | awk '{print $5}'",
                                        shell=True).decode("utf-8").rstrip('\n')
-        self.clean_tmp()
+        clean_tmp()
         return nwat
 
     def generate_restraints(self, who):
@@ -75,7 +75,7 @@ class Solvate(DDMClass):
 
         charge = subprocess.check_output("grep 'System has non-zero total charge' TMP | awk '{print $6}'",
                                          shell=True).decode("utf-8").rstrip('\n')
-        self.clean_tmp()
+        clean_tmp()
         if charge != '':  # TODO: charged complex
             if float(charge) > 0.0:
                 pass
@@ -98,27 +98,27 @@ class Solvate(DDMClass):
             :type who: str
         """
         # MINI
-        if not os.path.isfile(os.path.join(self.directory, 'mini.trr')):
+        if not os.path.isfile('mini.trr'):
             subprocess.call('gmx grompp -f ' + os.path.join(self.static_dir, 'MINI.mdp') + ' -c ' + who + '-cubic-box-solv-ions.pdb -p topol-' + who + '-solv.top -o mini.tpr -maxwarn 2',
                             shell=True)
             subprocess.call('gmx mdrun -v -deffnm mini',
                             shell=True)
         # HEAT
-        if not os.path.isfile(os.path.join(self.directory, 'heat.trr')):
+        if not os.path.isfile('heat.trr'):
             subprocess.call('gmx grompp -f ' + os.path.join(self.static_dir, 'HEAT.mdp') + ' -c mini.gro -p topol-' + who + '-solv.top -o heat.tpr -maxwarn 2',
                             shell=True)
             subprocess.call('gmx mdrun -v -deffnm heat',
                             shell=True)
 
         # EQLB1
-        if not os.path.isfile(os.path.join(self.directory, 'eqlb1.trr')):
+        if not os.path.isfile('eqlb1.trr'):
             subprocess.call('gmx grompp -f ' + os.path.join(self.static_dir, 'EQLB1.mdp') + ' -c heat.gro -p topol-' + who + '-solv.top -o eqlb1.tpr -maxwarn 2',
                             shell=True)
             subprocess.call('gmx mdrun -v -deffnm eqlb1',
                             shell=True)
 
         # EQLB2
-        if not os.path.isfile(os.path.join(self.directory, 'eqlb2.trr')):
+        if not os.path.isfile('eqlb2.trr'):
             subprocess.call('gmx grompp -f ' + os.path.join(self.static_dir, 'EQLB2.mdp') + ' -c eqlb1.gro -p topol-' + who + '-solv.top -o eqlb2.tpr -maxwarn 2',
                             shell=True)
             subprocess.call('gmx mdrun -v -deffnm eqlb2',
@@ -140,26 +140,24 @@ class SolvateBound(Solvate):
     def run(self):
         super(SolvateBound, self).run()
 
-        files_to_store = []
-
         # Prepare simulation box
-        if not os.path.isfile(os.path.join(self.directory, 'complex-cubic-box.pdb')):
+        if not os.path.isfile('complex-cubic-box.pdb'):
             self.prepare_simulation_box('complex')
 
         # Solvate
         nb_wat = ''
-        if not os.path.isfile(os.path.join(self.directory, 'complex-cubic-box-solv.pdb')) or not os.path.isfile(os.path.join(self.directory, 'topol-complex-solv.top')):
+        if not os.path.isfile('complex-cubic-box-solv.pdb') or not os.path.isfile('topol-complex-solv.top'):
             nb_wat = self.solvate('complex')
 
         # Generate restraints for solute
-        if not os.path.isfile(os.path.join(self.directory, self.host + '-posre.itp')):
+        if not os.path.isfile(self.host + '-posre.itp'):
             self.generate_restraints(self.host)
-        if not os.path.isfile(os.path.join(self.directory, self.guest + '-posre.itp')):
+        if not os.path.isfile(self.guest + '-posre.itp'):
             self.generate_restraints(self.guest)
 
         # Create the topol file
-        if not os.path.isfile(os.path.join(self.directory, 'topol-complex-solv.top')) and not os.path.isfile(os.path.join(self.directory, 'STORE/topol-complex-solv.top')):
-            if not os.path.isfile(os.path.join(self.directory, 'STORE/prod.tpr')):
+        if not os.path.isfile('topol-complex-solv.top') and not os.path.isfile('STORE/topol-complex-solv.top'):
+            if not os.path.isfile('STORE/prod.tpr'):
                 f = open(os.path.join(self.static_dir, 'complex-solv.top'), 'r')
                 filedata = f.read()
                 f.close()
@@ -168,27 +166,29 @@ class SolvateBound(Solvate):
                 newdata = newdata.replace('YYYYY', self.guest)
                 newdata = newdata.replace('ZZZZZ', nb_wat)
 
-                f = open(os.path.join(self.directory, 'topol-complex-solv.top'), 'w')
+                f = open('topol-complex-solv.top', 'w')
                 f.write(newdata)
                 f.close()
-                files_to_store.append('topol-complex-solv.top')
-        elif not os.path.isfile(os.path.join(self.directory, 'topol-complex-solv.top')) and os.path.isfile(os.path.join(self.directory, 'STORE/topol-complex-solv.top')):
-            shutil.copy(os.path.join(self.directory, 'STORE/topol-complex-solv.top'), self.directory)
+                self.files_to_store.append('topol-complex-solv.top')
+        elif not os.path.isfile('topol-complex-solv.top') and os.path.isfile('STORE/topol-complex-solv.top'):
+            shutil.copy('STORE/topol-complex-solv.top', self.directory)
 
         # Ionize
-        if not os.path.isfile(os.path.join(self.directory, 'complex-cubic-box-solv-ions.pdb')) and not os.path.isfile(os.path.join(self.directory, 'STORE/complex-cubic-box-solv-ions.pdb')):
+        if not os.path.isfile('complex-cubic-box-solv-ions.pdb') and not os.path.isfile('STORE/complex-cubic-box-solv-ions.pdb'):
             self.ionize('complex')
-            files_to_store.append('complex-cubic-box-solv-ions.pdb')
+            self.files_to_store.append('complex-cubic-box-solv-ions.pdb')
 
         # Run dynamics
-        if not os.path.isfile(os.path.join(self.directory, 'prod.tpr')) and not os.path.isfile(os.path.join(self.directory, 'STORE/prod.tpr')):
+        if not os.path.isfile('prod.tpr') and not os.path.isfile('STORE/prod.tpr'):
             self.run_dynamics('complex')
-            files_to_store.append('prod.tpr')
-            files_to_store.append('prod.xtc')
+            self.files_to_store.append('prod.tpr')
+            self.files_to_store.append('prod.xtc')
+            self.files_to_store.append('prod.cpt')
+            self.files_to_store.append('prod.gro')
 
-        self.store_files(files_to_store)
+        self.store_files()
 
-        self.clean_md_files()
+        clean_md_files()
 
 
 class SolvateUnbound(Solvate):
@@ -200,24 +200,22 @@ class SolvateUnbound(Solvate):
     def run(self):
         super(SolvateUnbound, self).run()
 
-        files_to_store = []
-
         # Prepare simulation box
-        if not os.path.isfile(os.path.join(self.directory, 'ligand-cubic-box.pdb')):
+        if not os.path.isfile('ligand-cubic-box.pdb'):
             self.prepare_simulation_box('ligand')
 
         # Solvate
         nb_wat = ''
-        if not os.path.isfile(os.path.join(self.directory, 'ligand-cubic-box-solv.pdb')) or not os.path.isfile(os.path.join(self.directory, 'topol-ligand-solv.top')):
+        if not os.path.isfile('ligand-cubic-box-solv.pdb') or not os.path.isfile('topol-ligand-solv.top'):
             nb_wat = self.solvate('ligand')
 
         # Generate restraints for solute
-        if not os.path.isfile(os.path.join(self.directory, self.guest + '-posre.itp')):
+        if not os.path.isfile(self.guest + '-posre.itp'):
             self.generate_restraints(self.guest)
 
         # Create the topol file
-        if not os.path.isfile(os.path.join(self.directory, 'topol-ligand-solv.top')) and not os.path.isfile(os.path.join(self.directory, 'STORE/topol-ligand-solv.top')):
-            if not os.path.isfile(os.path.join(self.directory, 'STORE/prod.tpr')):
+        if not os.path.isfile('topol-ligand-solv.top') and not os.path.isfile('STORE/topol-ligand-solv.top'):
+            if not os.path.isfile('STORE/prod.tpr'):
                 f = open(os.path.join(self.static_dir, 'ligand-solv.top'), 'r')
                 filedata = f.read()
                 f.close()
@@ -228,21 +226,21 @@ class SolvateUnbound(Solvate):
                 f = open(os.path.join(self.directory, 'topol-ligand-solv.top'), 'w')
                 f.write(newdata)
                 f.close()
-                files_to_store.append('topol-ligand-solv.top')
-        elif not os.path.isfile(os.path.join(self.directory, 'topol-ligand-solv.top')) and os.path.isfile(os.path.join(self.directory, 'STORE/topol-ligand-solv.top')):
-            shutil.copy(os.path.join(self.directory, 'STORE/topol-ligand-solv.top'), self.directory)
+                self.files_to_store.append('topol-ligand-solv.top')
+        elif not os.path.isfile('topol-ligand-solv.top') and os.path.isfile('STORE/topol-ligand-solv.top'):
+            shutil.copy('STORE/topol-ligand-solv.top', self.directory)
 
         # Ionize
-        if not os.path.isfile(os.path.join(self.directory, 'ligand-cubic-box-solv-ions.pdb')) and not os.path.isfile(os.path.join(self.directory, 'STORE/ligand-cubic-box-solv-ions.pdb')):
+        if not os.path.isfile('ligand-cubic-box-solv-ions.pdb') and not os.path.isfile('STORE/ligand-cubic-box-solv-ions.pdb'):
             self.ionize('ligand')
-            files_to_store.append('ligand-cubic-box-solv-ions.pdb')
+            self.files_to_store.append('ligand-cubic-box-solv-ions.pdb')
 
         # Run dynamics
-        if not os.path.isfile(os.path.join(self.directory, 'prod.trr')) and not os.path.isfile(os.path.join(self.directory, 'STORE/prod.tpr')):
+        if not os.path.isfile('prod.trr') and not os.path.isfile('STORE/prod.tpr'):
             self.run_dynamics('ligand')
-            files_to_store.append('prod.tpr')
-            files_to_store.append('prod.xtc')
+            self.files_to_store.append('prod.tpr')
+            self.files_to_store.append('prod.xtc')
 
-        self.store_files(files_to_store)
+        self.store_files()
 
-        self.clean_md_files()
+        clean_md_files()

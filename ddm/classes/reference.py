@@ -2,7 +2,7 @@
 import os
 import subprocess
 
-from .base import DDMClass
+from .base import DDMClass, check_step, clean_tmp, clean_md_files
 
 
 class PickReference(DDMClass):
@@ -20,40 +20,50 @@ class PickReference(DDMClass):
 
         os.chdir(self.directory)
 
-        # Extract last 10 ns (recentered)
-        if not os.path.isfile('last10ns.xtc'):
-            subprocess.call('echo "Other Other" | gmx trjconv  -f ' + os.path.join(self.prev_store_solv, 'prod.xtc') + ' -b 10000 -o last10ns.xtc -pbc cluster -s ' + os.path.join(self.prev_store_solv, 'prod.tpr'),
+        if not os.path.isfile('STORE/REFERENCE.pdb'):
+
+            # Extract last 10 ns (recentered)
+            if not os.path.isfile('last10ns.xtc'):
+                subprocess.call('echo "Other Other" | gmx trjconv  -f ' + os.path.join(self.prev_store_solv, 'prod.xtc') + ' -b 10000 -o last10ns.xtc -pbc cluster -s ' + os.path.join(self.prev_store_solv, 'prod.tpr'),
+                                shell=True)
+            check_step('last10ns.xtc')
+
+            # Cluster trj based on RMSD (cutoff 0.03 nm)
+            if not os.path.isfile('clusters.pdb'):
+                subprocess.call('echo "Other Other" | gmx cluster -f last10ns.xtc -s ' + os.path.join(self.prev_store_solv, 'prod.tpr') + ' -dist -cutoff 0.03 -cl -method jarvis-patrick',
+                                shell=True)
+            check_step('clusters.pdb')
+
+            if not os.path.isfile('most_populated.pdb'):
+                nb_row = subprocess.check_output("grep ATOM " + os.path.join(self.prev_store, 'complex_mini.pdb') + " | tail -1 | awk '{print $2+2}'",
+                                                 shell=True).decode("utf-8").rstrip('\n')
+                subprocess.call('head -' + nb_row + ' clusters.pdb > most_populated.pdb',
+                                shell=True)
+            check_step('most_populated.pdb')
+
+            nb_step = ''
+            if not os.path.isfile('relaxed.trr'):
+                subprocess.call('gmx grompp -f ' + os.path.join(self.static_dir, 'MINI.mdp') + ' -c most_populated.pdb -p ' + os.path.join(self.prev_store, 'topol-complex.top') + ' -o relaxed -maxwarn 2',
+                                shell=True)
+                subprocess.call('gmx mdrun -v -deffnm relaxed > TMP 2>&1',
+                                shell=True)
+            check_step('relaxed.trr')
+
+            nb_step = subprocess.check_output("grep 'Step' TMP | tail -1 | awk '{print $2}' | sed s/','//g",
+                                              shell=True).decode("utf-8").rstrip('\n')
+            subprocess.call('echo "System" | gmx trjconv -f relaxed.trr -s relaxed.tpr -o REFERENCE.pdb -b ' + nb_step,
                             shell=True)
-        self.check_step('last10ns.xtc')
+            check_step('REFERENCE.pdb')
 
-        # Cluster trj based on RMSD (cutoff 0.03 nm)
-        if not os.path.isfile('clusters.pdb'):
-            subprocess.call('echo "Other Other" | gmx cluster -f last10ns.xtc -s prod.tpr -dist -cutoff 0.03 -cl -method jarvis-patrick',
-                            shell=True)
-        self.check_step('clusters.pdb')
+            self.files_to_store.append('REFERENCE.pdb')
 
-        if not os.path.isfile('most_populated.pdb'):
-            nb_row = subprocess.check_output("grep ATOM " + os.path.join(self.prev_store, 'complex_mini.pdb') + " | tail -1 | awk '{print $2+2}'",
-                                             shell=True).decode("utf-8").rstrip('\n')
-            subprocess.call('head -' + nb_row + ' clusters.pdb > most_populated.pdb')
-        self.check_step('most_populated.pdb')
+            clean_tmp()
+            clean_md_files()
 
-        nb_step = ''
-        if not os.path.isfile('relaxed.trr'):
-            subprocess.call('gmx grompp -f ' + os.path.join(self.static_dir, 'MINI.mdp') + ' -c most_populated.pdb -p ' + os.path.join(self.prev_store, 'topol-complex.top') + ' -o relaxed -maxwarn 2',
-                            shell=True)
-            subprocess.call('gmx mdrun -v -deffnm relaxed > TMP 2>&1',
-                            shell=True)
-        self.check_step('relaxed.trr')
+        if not os.path.isfile('STORE/vba.dat'):
+            if not os.path.exists('STORE'):
+                os.makedirs('STORE')
 
-        nb_step = subprocess.check_output("grep 'Step' TMP | tail -1 | awk '{print $2}' | sed s/','//g",
-                                          shell=True).decode("utf-8").rstrip('\n')
-        subprocess.call('echo "System" | gmx trjconv -f relaxed.trr -s relaxed.tpr -o REFERENCE.pdb -b ' + nb_step,
-                        shell=True)
-
-        self.clean_tmp()
-
-        if not os.path.isfile('vba.dat'):
             f = open(os.path.join(self.static_dir, 'vba.tmpl'), 'r')
             filedata = f.read()
             f.close()
@@ -68,6 +78,6 @@ class PickReference(DDMClass):
             f = open(os.path.join(self.directory, 'STORE/vba.dat'), 'w')
             f.write(newdata)
             f.close()
+            check_step('STORE/vba.dat')
 
-        files_to_store = ['REFERENCE.pdb']
-        self.store_files(files_to_store)
+        self.store_files()

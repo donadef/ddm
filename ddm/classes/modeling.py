@@ -4,7 +4,7 @@ import shutil
 import subprocess
 
 from tools import cgenff_charmm2gmx
-from .base import DDMClass
+from .base import DDMClass, clean_md_files, clean_tmp
 
 
 class Modeling(DDMClass):
@@ -32,10 +32,10 @@ class Modeling(DDMClass):
         # Complex
         self.minimize_complex()
 
-        files_to_store = [self.guest + '.top', self.guest + '.prm', self.guest + '.itp', self.guest + '_ini.pdb', 'topol-ligand.top', 'ligand_mini.pdb',
-                          self.host + '.top', self.host + '.prm', self.host + '.itp', self.host + '_ini.pdb',
-                          'complex_mini.pdb', 'topol-complex.top']
-        self.store_files(files_to_store)
+        self.files_to_store = [self.guest + '.top', self.guest + '.prm', self.guest + '.itp', self.guest + '_ini.pdb', 'topol-ligand.top', 'ligand_mini.pdb',
+                               self.host + '.top', self.host + '.prm', self.host + '.itp', self.host + '_ini.pdb',
+                               'complex_mini.pdb', 'topol-complex.top']
+        self.store_files()
 
     def prepare_guest(self):
         # PDB file for the guest, extract from the complex given as input.
@@ -72,8 +72,8 @@ class Modeling(DDMClass):
                 self.minimize2('topol-ligand')
             self.extract_coordinates('ligand_mini')
 
-            self.clean_md_files()
-            self.clean_tmp()
+            clean_md_files()
+            clean_tmp()
 
     def prepare_host(self):
         # PDB file for the host, extract from the complex given as input.
@@ -111,8 +111,8 @@ class Modeling(DDMClass):
                 self.minimize2('topol-complex')
             self.extract_coordinates('complex_mini')
 
-            self.clean_md_files()
-            self.clean_tmp()
+            clean_md_files()
+            clean_tmp()
 
     def generate_param_files(self, who):
         subprocess.call('babel -ipdb ' + who + '.pdb -omol2 ' + who + '.mol2 --title ' + who,
