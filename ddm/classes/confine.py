@@ -2,9 +2,8 @@
 import os
 import shutil
 import subprocess
-import numpy as np
 
-from .base import DDMClass, check_step
+from .base import DDMClass, check_step, clean_md_files, compute_std, compute_kf, compute_kf_plus, compute_fluct, compute_trapez
 
 
 class Confine(DDMClass):
@@ -40,6 +39,9 @@ class ConfineBound(Confine):
         self.prev_store_ref = os.path.join(self.dest, '03-pick-reference/STORE')
         self.prev_store_solv = os.path.join(self.dest, '01-solvate-bound/STORE')
 
+        self.kappa = ''
+        self.krms = ''
+
     def run(self):
         super(ConfineBound, self).run()
 
@@ -69,40 +71,38 @@ class ConfineBound(Confine):
                 subprocess.call('plumed driver --plumed plumed_rmsd_anal.inp --mf_xtc ' + os.path.join(self.prev_store_solv, 'prod.xtc') + ' --timestep 0.002 --trajectory-stride 2500',
                                 shell=True)
                 check_step('PLUMED.out')
-                self.files_to_store.append('PLUMED.out')
+                shutil.copy('PLUMED.out', 'STORE/0.rms')
             else:
                 path_to_plumed_out = 'STORE/'
 
-        self.store_files()
-
-        kf = '1'
         # Evaluate k_unbiased by QHA and kf
-        if not os.path.isfile('STORE/file.kappa') or not os.path.isfile('STORE/file.krms'):
-            lc1 = []
-            with open(path_to_plumed_out + 'PLUMED.out', 'r') as plumed_file:
-                for line in plumed_file:
-                    if not line.startswith('#'):
-                        trash, c1 = line.lstrip(' ').rstrip('\n').split(' ')
-                        lc1.append(float(c1))
-            a = np.array(lc1)
-            # Compute the standard deviation
-            std_c1 = np.std(a)
+        if not os.path.isfile('STORE/file.kappa'):
+            std_c1 = compute_std(2, path_to_plumed_out + 'PLUMED.out')
 
             # Compute Kf
-            kf_u = (8.314 * 298 / 1000) / std_c1 ** 2
+            kf_u = compute_kf(std_c1)
+            self.kappa = kf_u
             f = open('STORE/file.kappa', 'w')
-            f.write(str(kf_u) + '\n')
+            f.write(str(self.kappa) + '\n')
             f.close()
             check_step('STORE/file.kappa')
 
-            kf += '0' * len(str(kf_u).split('.')[0])
-            f = open('STORE/file.krms', 'w')
-            f.write(str(kf) + '\n')
+        if self.kappa == '':
+            f = open('STORE/file.kappa', 'r')
+            self.kappa = float(f.read())
             f.close()
 
-        if kf == '1':
+        if not os.path.isfile('STORE/file.krms'):
+            kf = float(compute_kf_plus(self.kappa))
+            self.krms = kf
+            f = open('STORE/file.krms', 'w')
+            f.write(str(self.krms) + '\n')
+            f.close()
+
+        if self.krms == '':
             f = open('STORE/file.krms', 'r')
-            kf = f.read()
+            kf = float(f.read())
+            self.krms = kf
             f.close()
 
         if not os.path.isfile('STORE/6.gro'):
@@ -112,7 +112,7 @@ class ConfineBound(Confine):
             prev = os.path.join(self.prev_store_solv, 'prod')
             for ll in [0.001, 0.01, 0.1, 0.2, 0.5, 1.0]:
                 if not os.path.isfile('STORE' + str(ll) + '.rms'):
-                    kk = float(kf) * ll
+                    kk = self.krms * ll
 
                     # Modify the plumed_rmsd_bias.inp file
                     f = open('plumed_rmsd_bias.inp', 'r')
@@ -137,5 +137,17 @@ class ConfineBound(Confine):
             self.files_to_store = ['6.gro', '6.cpt']
             self.store_files()
 
+            os.remove('file.dat')
+            clean_md_files()
+
+        if not os.path.isfile('STORE/RMS'):
+            flucts = []
+            for ll in [0, 0.001, 0.01, 0.1, 0.2, 0.5, 1.0]:
+                flucts.append(str(ll) + ' ' + str(compute_fluct(0.0, ll, self.krms, 2, "STORE/" + str(ll) + '.rms')))
+            f = open('STORE/RMS', 'w')
+            f.writelines(list(map(lambda x: str(x) + '\n', flucts)))
+            f.close()
+
+        return compute_trapez('STORE/RMS')
 
 

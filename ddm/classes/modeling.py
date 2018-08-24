@@ -8,10 +8,11 @@ from .base import DDMClass, clean_md_files, clean_tmp
 
 
 class Modeling(DDMClass):
-    def __init__(self, config, complex):
+    def __init__(self, config, complex, guest):
         super(Modeling, self).__init__(config, complex)
         self.directory = os.path.join(self.dest, '00-modeling')
         self.static_dir = os.path.join(self.static_dir, '00-modeling')
+        self.guest = guest
 
     def run(self):
         if not os.path.exists(self.directory):
@@ -32,18 +33,15 @@ class Modeling(DDMClass):
         # Complex
         self.minimize_complex()
 
-        self.files_to_store = [self.guest + '.top', self.guest + '.prm', self.guest + '.itp', self.guest + '_ini.pdb', 'topol-ligand.top', 'ligand_mini.pdb',
+        self.files_to_store = [self.guest.name + '.top', self.guest.name + '.prm', self.guest.name + '.itp', self.guest.name + '_ini.pdb', 'topol-ligand.top', 'ligand_mini.pdb',
                                self.host + '.top', self.host + '.prm', self.host + '.itp', self.host + '_ini.pdb',
                                'complex_mini.pdb', 'topol-complex.top']
         self.store_files()
 
     def prepare_guest(self):
-        # PDB file for the guest, extract from the complex given as input.
-        if not os.path.isfile(os.path.join(self.directory, self.guest + '.pdb')):
-            subprocess.call('grep " ' + self.guest + ' " ' + self.ipdb + '.pdb' + ' > ' + os.path.join(self.directory, self.guest + '.pdb'),
-                            shell=True)
-        if not os.path.isfile(os.path.join(self.directory, self.guest + '.top')):
-            self.generate_param_files(self.guest)
+        # PDB param file for the guest
+        if not os.path.isfile(os.path.join(self.directory, self.guest.name + '.top')):
+            self.generate_param_files(self.guest.name, self.guest.pdb_file_path)
 
     def minimize_guest(self):
         if not os.path.isfile(os.path.join(self.directory, 'ligand_mini.pdb')):
@@ -53,7 +51,7 @@ class Modeling(DDMClass):
                 filedata = f.read()
                 f.close()
 
-                newdata = filedata.replace("XXXXX", self.guest)
+                newdata = filedata.replace("XXXXX", self.guest.name)
 
                 f = open(os.path.join(self.directory, 'topol-ligand.top'), 'w')
                 f.write(newdata)
@@ -61,7 +59,7 @@ class Modeling(DDMClass):
 
             # First minimization step, steepest descent method.
             if not os.path.isfile(os.path.join(self.directory, 'mini1.trr')):
-                self.minimize1(self.guest + '_ini', 'topol-ligand')
+                self.minimize1(self.guest.name + '_ini', 'topol-ligand')
 
             # Second minimization step, conjugate gradient method.
             if not os.path.isfile(os.path.join(self.directory, 'mini2.trr')):
@@ -92,7 +90,7 @@ class Modeling(DDMClass):
                 f.close()
 
                 newdata = filedata.replace('XXXXX', self.host)
-                newdata = newdata.replace('YYYYY', self.guest)
+                newdata = newdata.replace('YYYYY', self.guest.name)
 
                 f = open(os.path.join(self.directory, 'topol-complex.top'), 'w')
                 f.write(newdata)
@@ -114,8 +112,8 @@ class Modeling(DDMClass):
             clean_md_files()
             clean_tmp()
 
-    def generate_param_files(self, who):
-        subprocess.call('babel -ipdb ' + who + '.pdb -omol2 ' + who + '.mol2 --title ' + who,
+    def generate_param_files(self, who, pdb):
+        subprocess.call('babel -ipdb ' + pdb + ' -omol2 ' + who + '.mol2 --title ' + who,
                         shell=True)
 
         subprocess.call('cgenff ' + who + '.mol2 > ' + who + '.str',
