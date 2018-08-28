@@ -7,15 +7,9 @@ from .base import DDMClass, clean_md_files, clean_tmp
 
 
 class Solvate(DDMClass):
-    def __init__(self, config, complex):
-        super(Solvate, self).__init__(config, complex)
+    def __init__(self, config):
+        super(Solvate, self).__init__(config)
         self.prev_store = os.path.join(self.dest, '00-modeling/STORE')
-
-    def run(self):
-        if not os.path.exists(self.directory):
-            os.makedirs(self.directory)
-
-        os.chdir(self.directory)
 
     def prepare_simulation_box(self, who):
         """
@@ -132,10 +126,13 @@ class Solvate(DDMClass):
 
 
 class SolvateBound(Solvate):
-    def __init__(self, config, complex):
-        super(SolvateBound, self).__init__(config, complex)
+    def __init__(self, config, guest, host):
+        super(SolvateBound, self).__init__(config)
         self.directory = os.path.join(self.dest, '01-solvate-bound')
         self.static_dir = os.path.join(self.static_dir, '01-solvate-bound')
+
+        self.guest = guest
+        self.host = host
 
     def run(self):
         super(SolvateBound, self).run()
@@ -150,10 +147,10 @@ class SolvateBound(Solvate):
             nb_wat = self.solvate('complex')
 
         # Generate restraints for solute
-        if not os.path.isfile(self.host + '-posre.itp'):
-            self.generate_restraints(self.host)
-        if not os.path.isfile(self.guest + '-posre.itp'):
-            self.generate_restraints(self.guest)
+        if not os.path.isfile(self.host.name + '-posre.itp'):
+            self.generate_restraints(self.host.name)
+        if not os.path.isfile(self.guest.name + '-posre.itp'):
+            self.generate_restraints(self.guest.name)
 
         # Create the topol file
         if not os.path.isfile('topol-complex-solv.top') and not os.path.isfile('STORE/topol-complex-solv.top'):
@@ -162,8 +159,8 @@ class SolvateBound(Solvate):
                 filedata = f.read()
                 f.close()
 
-                newdata = filedata.replace('XXXXX', self.host)
-                newdata = newdata.replace('YYYYY', self.guest)
+                newdata = filedata.replace('XXXXX', self.host.name)
+                newdata = newdata.replace('YYYYY', self.guest.name)
                 newdata = newdata.replace('ZZZZZ', nb_wat)
 
                 f = open('topol-complex-solv.top', 'w')
@@ -192,10 +189,12 @@ class SolvateBound(Solvate):
 
 
 class SolvateUnbound(Solvate):
-    def __init__(self, config, complex):
-        super(SolvateUnbound, self).__init__(config, complex)
+    def __init__(self, config, guest):
+        super(SolvateUnbound, self).__init__(config)
         self.directory = os.path.join(self.dest, '02-solvate-unbound')
         self.static_dir = os.path.join(self.static_dir, '02-solvate-unbound')
+
+        self.guest = guest
 
     def run(self):
         super(SolvateUnbound, self).run()
@@ -210,8 +209,8 @@ class SolvateUnbound(Solvate):
             nb_wat = self.solvate('ligand')
 
         # Generate restraints for solute
-        if not os.path.isfile(self.guest + '-posre.itp'):
-            self.generate_restraints(self.guest)
+        if not os.path.isfile(self.guest.name + '-posre.itp'):
+            self.generate_restraints(self.guest.name)
 
         # Create the topol file
         if not os.path.isfile('topol-ligand-solv.top') and not os.path.isfile('STORE/topol-ligand-solv.top'):
@@ -220,7 +219,7 @@ class SolvateUnbound(Solvate):
                 filedata = f.read()
                 f.close()
 
-                newdata = filedata.replace('YYYYY', self.guest)
+                newdata = filedata.replace('YYYYY', self.guest.name)
                 newdata = newdata.replace('ZZZZZ', nb_wat)
 
                 f = open(os.path.join(self.directory, 'topol-ligand-solv.top'), 'w')

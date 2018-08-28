@@ -6,8 +6,8 @@ from .base import DDMClass, check_step, clean_tmp, clean_md_files
 
 
 class PickReference(DDMClass):
-    def __init__(self, config, complex):
-        super(PickReference, self).__init__(config, complex)
+    def __init__(self, config):
+        super(PickReference, self).__init__(config)
 
         self.prev_store = os.path.join(self.dest, '00-modeling/STORE')
         self.prev_store_solv = os.path.join(self.dest, '01-solvate-bound/STORE')
@@ -15,10 +15,7 @@ class PickReference(DDMClass):
         self.static_dir = os.path.join(self.static_dir, '03-pick-reference')
 
     def run(self):
-        if not os.path.exists(self.directory):
-            os.makedirs(self.directory)
-
-        os.chdir(self.directory)
+        super(PickReference, self).run()
 
         if not os.path.isfile('STORE/REFERENCE.pdb'):
 

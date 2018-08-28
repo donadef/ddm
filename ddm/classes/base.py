@@ -3,7 +3,8 @@ import os
 import shutil
 import glob
 import numpy as np
-import configparser
+from scipy import constants as c
+import math
 
 
 def check_step(file):
@@ -67,11 +68,12 @@ def compute_kf_plus(kf):
         kf_plus = 100
     return float(kf_plus)
 
-def compute_fluct(x0, lam, kf, col, rms_file, dihe=False):
+
+def compute_fluct(x0, kf, col, file, dihe=False):
     sum = 0
     cc = 0
-    with open(rms_file, 'r') as file:
-        for line in file:
+    with open(file, 'r') as f:
+        for line in f:
             if not line.startswith('#'):
                 c = line.lstrip(' ').rstrip('\n').split(' ')[col - 1]
                 delta = float(c) - x0
@@ -86,29 +88,42 @@ def compute_fluct(x0, lam, kf, col, rms_file, dihe=False):
     return (float(kf) / 2) * (sum / cc)
 
 
-def compute_trapez(rms_file, verbose=False):
+def compute_trapez(fluct_list, col):
     """ Compute the trapezoidal integration"""
     l = []
-    with open(rms_file, 'r') as file:
-        for line in file:
-            if not line.startswith('#'):
-                ll, dhdl = line.lstrip(' ').rstrip('\n').split(' ')
-                l.append([float(ll), float(dhdl)])
+    for item in fluct_list:
+        item = item.lstrip(' ').rstrip('\n').split(' ')
+        ll = item[0]
+        dhdl = item[col - 1]
+        l.append([float(ll), float(dhdl)])
     sum = 0
     for i in range(len(l) - 1):
-        dA = 0.5 * (l[i][1] + l[i+1][1]) * (l[i][0] + l[i+1][0])
+        dA = 0.5 * (l[i][1] + l[i+1][1]) * (l[i+1][0] - l[i][0])
         sum += dA
     return sum / 4.184
 
+
+def compute_work(kappa):
+    kT = c.Boltzmann * c.N_A * 298 / 1000  # kJ/mol
+
+    # positional restrain
+    Ztr = 1.66058  # nm^3/molecule (volume/molecule @ 1M)
+    Ztr_R = (kappa[6] ** 2) * math.sin(kappa[7]) * (2 * np.pi * kT) ** (3/2) / math.sqrt(kappa[0] * kappa[1] * kappa[2])
+
+    # orientation restrain
+    Zrot = 8 * (np.pi ** 2)
+    Zrot_R = math.sin(kappa[8]) * (2 * np.pi * kT) / math.sqrt(kappa[3] * kappa[4] * kappa[5])
+
+    # Restraint work
+    Wr = -kT * (math.log(Ztr/Ztr_R) + math.log(Zrot/Zrot_R)) / 4.184
+    return Wr
+
+
 class DDMClass:
-    def __init__(self, config, complex):
+    def __init__(self, config):
         self.config = config
 
-        self.host = self.config['main']['host']
         self.dest = self.config['main']['dest']
-
-        self.complex = complex
-        self.ipdb = os.path.basename(self.complex).rstrip('.pdb')
 
         self.static_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'static')
         self.awk_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'awk')
@@ -116,6 +131,12 @@ class DDMClass:
         self.directory = self.dest
 
         self.files_to_store = []
+
+    def run(self):
+        if not os.path.exists(self.directory):
+            os.makedirs(self.directory)
+
+        os.chdir(self.directory)
 
     def store_files(self):
         store_dir = os.path.join(self.directory, 'STORE')
@@ -131,9 +152,9 @@ class DDMClass:
 
 
 class Guest:
-    def __init__(self, guest_name, complex, dest):
+    def __init__(self, guest_name, complex_obj, dest):
         self.name = guest_name
-        self.complex = complex
+        self.complex = complex_obj
         self.dest = dest
 
         self.pdb_file_path = os.path.join(self.dest, self.name + '.pdb')
@@ -145,12 +166,11 @@ class Guest:
     def create_pdb(self):
         pdb = []
         if not os.path.isfile(self.pdb_file_path):
-            with open(self.complex, 'r') as file:
-                for line in file:
-                    if self.name in line:
-                        pdb.append(line)
+            for line in self.complex.pdb:
+                if self.name in line:
+                    pdb.append(line)
             f = open(self.pdb_file_path, 'w')
-            f.writelines(list(map(lambda x: str(x) + '\n', self.pdb)))
+            f.writelines(list(map(lambda x: str(x) + '\n', pdb)))
             f.close()
         else:
             with open(self.pdb_file_path, 'r') as file:
@@ -161,9 +181,54 @@ class Guest:
     def find_beg(self):
         for i in range(len(self.pdb)):
             if 'ATOM' in self.pdb[i]:
-                return self.pdb[i].split(' ')[1]
+                return self.pdb[i].split()[1]
 
     def find_end(self):
         for i in range(1, len(self.pdb)+1):
-            if 'ATOM' in self.pdb[i]:
-                return self.pdb[i].split(' ')[1]
+            if 'ATOM' in self.pdb[-i]:
+                return self.pdb[-i].split()[1]
+
+
+class Host:
+    def __init__(self, host_name, complex_obj, dest):
+        self.name = host_name
+        self.complex = complex_obj
+        self.dest = dest
+
+        self.pdb_file_path = os.path.join(self.dest, self.name + '.pdb')
+        self.pdb = self.create_pdb()
+
+    def create_pdb(self):
+        pdb = []
+        if not os.path.isfile(self.pdb_file_path):
+            for line in self.complex.pdb:
+                if self.name in line:
+                    pdb.append(line)
+            f = open(self.pdb_file_path, 'w')
+            f.writelines(list(map(lambda x: str(x) + '\n', pdb)))
+            f.close()
+        else:
+            with open(self.pdb_file_path, 'r') as file:
+                for line in file:
+                    pdb.append(line.rstrip('\n'))
+        return pdb
+
+
+class Complex:
+    def __init__(self, pdb_complex, dest):
+        self.pdb_ori = pdb_complex
+        self.name = os.path.basename(self.pdb_ori).rstrip('.pdb')
+        self.dest = dest
+
+        self.pdb_file_path = os.path.join(self.dest, os.path.basename(self.pdb_ori))
+
+        self.pdb = self.create_pdb()
+
+    def create_pdb(self):
+        pdb = []
+        if not os.path.isfile(self.pdb_file_path):
+            shutil.copy(self.pdb_ori, self.dest)
+        with open(self.pdb_file_path, 'r') as file:
+            for line in file:
+                pdb.append(line.rstrip('\n'))
+        return pdb

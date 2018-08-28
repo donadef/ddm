@@ -8,20 +8,17 @@ from .base import DDMClass, clean_md_files, clean_tmp
 
 
 class Modeling(DDMClass):
-    def __init__(self, config, complex, guest):
-        super(Modeling, self).__init__(config, complex)
+    def __init__(self, config, guest, host, complex):
+        super(Modeling, self).__init__(config)
         self.directory = os.path.join(self.dest, '00-modeling')
         self.static_dir = os.path.join(self.static_dir, '00-modeling')
+
         self.guest = guest
+        self.host = host
+        self.complex = complex
 
     def run(self):
-        if not os.path.exists(self.directory):
-            os.makedirs(self.directory)
-
-        # Copy the complex pdb in the folder
-        shutil.copy(self.complex, self.directory)
-
-        os.chdir(self.directory)
+        super(Modeling, self).run()
 
         # Guest
         self.prepare_guest()
@@ -34,7 +31,7 @@ class Modeling(DDMClass):
         self.minimize_complex()
 
         self.files_to_store = [self.guest.name + '.top', self.guest.name + '.prm', self.guest.name + '.itp', self.guest.name + '_ini.pdb', 'topol-ligand.top', 'ligand_mini.pdb',
-                               self.host + '.top', self.host + '.prm', self.host + '.itp', self.host + '_ini.pdb',
+                               self.host.name + '.top', self.host.name + '.prm', self.host.name + '.itp', self.host.name + '_ini.pdb',
                                'complex_mini.pdb', 'topol-complex.top']
         self.store_files()
 
@@ -74,12 +71,9 @@ class Modeling(DDMClass):
             clean_tmp()
 
     def prepare_host(self):
-        # PDB file for the host, extract from the complex given as input.
-        if not os.path.isfile(os.path.join(self.directory, self.host + '.pdb')):
-            subprocess.call('grep " ' + self.host + ' " ' + self.ipdb + '.pdb' + ' > ' + os.path.join(self.directory, self.host + '.pdb'),
-                            shell=True)
-        if not os.path.isfile(os.path.join(self.directory, self.host + '.top')):
-            self.generate_param_files(self.host)
+        # PDB file for the host
+        if not os.path.isfile(os.path.join(self.directory, self.host.name + '.top')):
+            self.generate_param_files(self.host.name, self.host.pdb_file_path)
 
     def minimize_complex(self):
         if not os.path.isfile(os.path.join(self.directory, 'complex_mini.pdb')):
@@ -89,7 +83,7 @@ class Modeling(DDMClass):
                 filedata = f.read()
                 f.close()
 
-                newdata = filedata.replace('XXXXX', self.host)
+                newdata = filedata.replace('XXXXX', self.host.name)
                 newdata = newdata.replace('YYYYY', self.guest.name)
 
                 f = open(os.path.join(self.directory, 'topol-complex.top'), 'w')
@@ -98,7 +92,7 @@ class Modeling(DDMClass):
 
             # First minimization step, steepest descent method.
             if not os.path.isfile(os.path.join(self.directory, 'mini1.trr')):
-                self.minimize1(self.ipdb, 'topol-complex')
+                self.minimize1('../' + self.complex.name, 'topol-complex')
 
             # Second minimization step, conjugate gradient method.
             if not os.path.isfile(os.path.join(self.directory, 'mini2.trr')):

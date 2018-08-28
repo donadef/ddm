@@ -2,3 +2,4 @@ numpy==1.15.0
 networkx==2.1
 click==6.7
 numpy==1.15.0
+scipy==1.1.0

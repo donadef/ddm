@@ -6,8 +6,8 @@ from .base import DDMClass, check_step, compute_std, compute_kf, compute_kf_plus
 
 
 class MonitorCVs(DDMClass):
-    def __init__(self, config, complex):
-        super(MonitorCVs, self).__init__(config, complex)
+    def __init__(self, config):
+        super(MonitorCVs, self).__init__(config)
 
         self.prev_store = os.path.join(self.dest, '03-pick-reference/STORE')
         self.prev_store_solv = os.path.join(self.dest, '01-solvate-bound/STORE')
@@ -15,16 +15,16 @@ class MonitorCVs(DDMClass):
 
         self.x0 = []
         self.kappa = []
-        self.krms = []
+        self.kappa_max = []
 
     def run(self):
-        if not os.path.exists(self.directory):
-            os.makedirs(self.directory)
-
-        os.chdir(self.directory)
+        super(MonitorCVs, self).run()
 
         # Monitor POS/ORIE of ligand in REFERENCE
         if not os.path.isfile('STORE/file.x0'):
+            if not os.path.exists('STORE'):
+                os.makedirs('STORE')
+
             subprocess.call('plumed driver --plumed ' + os.path.join(self.prev_store, 'vba.dat') + ' --mf_pdb ' + os.path.join(self.prev_store, 'REFERENCE.pdb'),
                             shell=True)
 
@@ -56,6 +56,8 @@ class MonitorCVs(DDMClass):
                             shell=True)
 
             check_step('COLVAR-rest')
+            self.files_to_store = ['COLVAR-rest']
+            self.store_files()
 
             # Plot distributions
             # nb_bin = subprocess.check_output("wc COLVAR-rest | awk '{print sqrt($1)}'", shell=True)
@@ -84,15 +86,13 @@ class MonitorCVs(DDMClass):
                 for line in file:
                     self.kappa.append(float(line.rstrip('\n')))
 
-        if not os.path.isfile('STORE/file.krms'):
-            self.krms = list(map(compute_kf_plus, self.kappa))
-            f = open('STORE/file.krms', 'w')
-            f.writelines(list(map(lambda x: str(x) + '\n', self.krms)))
+        if not os.path.isfile('STORE/file_max.kappa'):
+            self.kappa_max = list(map(compute_kf_plus, self.kappa))
+            f = open('STORE/file_max.kappa', 'w')
+            f.writelines(list(map(lambda x: str(x) + '\n', self.kappa_max)))
             f.close()
 
-        if not self.krms:
-            with open('STORE/file.krms', 'r') as file:
+        if not self.kappa_max:
+            with open('STORE/file_max.kappa', 'r') as file:
                 for line in file:
-                    self.krms.append(float(line.rstrip('\n')))
-
-        self.store_files()
+                    self.kappa_max.append(float(line.rstrip('\n')))
