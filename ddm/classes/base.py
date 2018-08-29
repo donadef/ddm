@@ -115,7 +115,7 @@ def compute_work(kappa):
     Zrot_R = math.sin(kappa[8]) * (2 * np.pi * kT) / math.sqrt(kappa[3] * kappa[4] * kappa[5])
 
     # Restraint work
-    Wr = -kT * (math.log(Ztr/Ztr_R) + math.log(Zrot/Zrot_R)) / 4.184
+    Wr = -kT * (math.log(Ztr/Ztr_R) + math.log(Zrot/Zrot_R)) / 4.184  # kcal/mol
     return Wr
 
 

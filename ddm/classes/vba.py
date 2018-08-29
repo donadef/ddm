@@ -2,13 +2,15 @@
 import os
 import shutil
 import subprocess
+from scipy import constants as c
+import math
 
 from .base import DDMClass, check_step, clean_md_files, compute_std, compute_fluct, compute_trapez, compute_work
 
 
-class Vba(DDMClass):
+class Bound(DDMClass):
     def __init__(self, config, guest, x0, kappa_max, krms_max):
-        super(Vba, self).__init__(config)
+        super(Bound, self).__init__(config)
 
         self.guest = guest
         self.x0 = x0
@@ -18,7 +20,7 @@ class Vba(DDMClass):
         self.dihe = [False, False, True, False, True, True]
 
     def create_plumed_tmpl(self):
-        f = open(os.path.join(self.static_dir, 'vba_bias.tmpl'), 'r')
+        f = open(os.path.join(self.static_dir, 'plumed.tmpl'), 'r')
         filedata = f.read()
         f.close()
 
@@ -36,7 +38,7 @@ class Vba(DDMClass):
         return newdata
 
 
-class VbaBound(Vba):
+class VbaBound(Bound):
     def __init__(self, config, guest, x0, kappa_max, krms_max):
         super(VbaBound, self).__init__(config, guest, x0, kappa_max, krms_max)
         self.directory = os.path.join(self.dest, '06-vba-bound')
@@ -50,10 +52,10 @@ class VbaBound(Vba):
     def run(self):
         super(VbaBound, self).run()
 
-        if not os.path.isfile('STORE/1.0.vba'):
-            if not os.path.exists('STORE'):
-                os.makedirs('STORE')
+        if not os.path.exists('STORE'):
+            os.makedirs('STORE')
 
+        if not os.path.isfile('STORE/1.0.vba'):
             # Copy the topol file here
             shutil.copy(os.path.join(self.prev_store_solv, 'topol-complex-solv.top'), self.directory)
 
@@ -62,7 +64,7 @@ class VbaBound(Vba):
             nn = 1
             prev = os.path.join(self.prev_store, '6')
             for ll in [0.001, 0.01, 0.1, 0.2, 0.5, 1.0]:
-                if not os.path.isfile('STORE' + str(ll) + '.vba'):
+                if not os.path.isfile('STORE/' + str(ll) + '.vba'):
 
                     newdata = filedata.replace('KK1', str(self.kappa_max[0] * ll))
                     newdata = newdata.replace('KK2', str(self.kappa_max[1] * ll))
@@ -120,38 +122,57 @@ class VbaBound(Vba):
         if not self.dG:
             with open('STORE/VBA_BND.dG', 'r') as file:
                 for line in file:
-                    self.dG.append(line.rstrip('\n'))
+                    self.dG.append(float(line.rstrip('\n')))
 
         return self.dG
 
 
+def compute_sym_corr(sigma_l, sigma_p, sigma_pl):
+    kT = c.Boltzmann * c.N_A * 298 / 1000  # kJ/mol
+
+    return -kT * math.log(sigma_pl / (sigma_l * sigma_p)) / 4.184  # kcal/mol
+
+
 class VbaUnbound(DDMClass):
-    def __init__(self, config, kappa_max):
+    def __init__(self, config, kappa):
         super(VbaUnbound, self).__init__(config)
         self.directory = os.path.join(self.dest, '07-work-unbound')
         self.prev_store = os.path.join(self.dest, '06-vba-bound/STORE')
 
-        self.kappa_max = kappa_max
+        self.kappa = kappa
         self.dG = []
+        self.sym_corr = []
 
     def run(self):
         super(VbaUnbound, self).run()
 
-        for col in [2, 3, 4]:
-            self.kappa_max.append(compute_std(col, os.path.join(self.prev_store, '1.0.vba')))
-        print(self.kappa_max)
+        if not os.path.exists('STORE'):
+            os.makedirs('STORE')
 
         if not os.path.isfile('STORE/VBA_UB.dG'):
-            if not os.path.exists('STORE'):
-                os.makedirs('STORE')
-            self.dG = compute_work(self.kappa_max)
+            for col in [2, 3, 4]:
+                self.kappa.append(compute_std(col, os.path.join(self.prev_store, '1.0.vba')))
+
+            self.dG.append(compute_work(self.kappa))
             f = open('STORE/VBA_UB.dG', 'w')
-            f.write(str(self.dG) + '\n')
+            f.writelines(list(map(lambda x: str(x) + '\n', self.dG)))
             f.close()
 
-        if self.dG == '':
+        if not self.dG:
             with open('STORE/VBA_UB.dG', 'r') as file:
                 for line in file:
-                    self.dG.append(line.rstrip('\n'))
+                    self.dG.append(float(line.rstrip('\n')))
 
-        return self.dG
+        if not os.path.isfile('STORE/sym_corr.dat'):
+            self.sym_corr.append(compute_sym_corr(1, 14, 1))
+            f = open('STORE/sym_corr.dat', 'w')
+            f.writelines(list(map(lambda x: str(x) + '\n', self.sym_corr)))
+            f.close()
+
+        if not self.sym_corr:
+            with open('STORE/sym_corr.dat', 'r') as file:
+                for line in file:
+                    self.sym_corr.append(float(line.rstrip('\n')))
+
+        return self.dG, self.sym_corr
+

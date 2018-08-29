@@ -1,0 +1,22 @@
+; Defining the main source of the force field parameters 
+#include "charmm36-nov2016.ff/forcefield.itp"
+; Additional parameters for the molecules
+#include "ad0.prm"
+; Additional topology for the molecules
+#include "ad0.itp"
+; Solute position restraints
+#ifdef POSRES
+#include "ad0-posre.itp"
+#endif
+
+; Include topology for tp3p water model
+#include "charmm36-nov2016.ff/tip3p.itp"
+
+[ system ]
+; Name
+Ligand AD0 in water
+
+[ molecules ]
+; Compound        #mols
+AD0               1
+SOL             864
