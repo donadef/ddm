@@ -151,7 +151,7 @@ class ConfineBound(Confine):
 
         if not os.path.isfile('STORE/RMS'):
             for ll in [0, 0.001, 0.01, 0.1, 0.2, 0.5, 1.0]:
-                self.flucts.append(str(ll) + ' ' + str(compute_fluct(0.0, self.krms, 2, "STORE/" + str(ll) + '.rms')))
+                self.flucts.append(str(ll) + ' ' + str(compute_fluct(0.0, self.krms_max, 2, "STORE/" + str(ll) + '.rms')))
             f = open('STORE/RMS', 'w')
             f.writelines(list(map(lambda x: str(x) + '\n', self.flucts)))
             f.close()
@@ -170,7 +170,7 @@ class ConfineBound(Confine):
         if not self.dG:
             with open('STORE/CONF_BND.dG', 'r') as file:
                 for line in file:
-                    self.dG.append(line.rstrip('\n'))
+                    self.dG.append(float(line.rstrip('\n')))
 
         return self.dG
 
@@ -262,6 +262,6 @@ class ConfineUnbound(Confine):
         if not self.dG:
             with open('STORE/CONF_BND.dG', 'r') as file:
                 for line in file:
-                    self.dG.append(line.rstrip('\n'))
+                    self.dG.append(float(line.rstrip('\n')))
 
         return self.dG

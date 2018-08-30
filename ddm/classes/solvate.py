@@ -3,7 +3,7 @@ import os
 import shutil
 import subprocess
 
-from .base import DDMClass, clean_md_files, clean_tmp
+from .base import DDMClass, clean_md_files, clean_tmp, check_step
 
 
 class Solvate(DDMClass):
@@ -92,37 +92,38 @@ class Solvate(DDMClass):
             :type who: str
         """
         # MINI
-        if not os.path.isfile('mini.trr'):
+        if not os.path.isfile('mini.gro'):
             subprocess.call('gmx grompp -f ' + os.path.join(self.static_dir, 'MINI.mdp') + ' -c ' + who + '-cubic-box-solv-ions.pdb -p topol-' + who + '-solv.top -o mini.tpr -maxwarn 2',
                             shell=True)
             subprocess.call('gmx mdrun -v -deffnm mini',
                             shell=True)
         # HEAT
-        if not os.path.isfile('heat.trr'):
+        if not os.path.isfile('heat.gro'):
             subprocess.call('gmx grompp -f ' + os.path.join(self.static_dir, 'HEAT.mdp') + ' -c mini.gro -p topol-' + who + '-solv.top -o heat.tpr -maxwarn 2',
                             shell=True)
             subprocess.call('gmx mdrun -v -deffnm heat',
                             shell=True)
 
         # EQLB1
-        if not os.path.isfile('eqlb1.trr'):
+        if not os.path.isfile('eqlb1.gro'):
             subprocess.call('gmx grompp -f ' + os.path.join(self.static_dir, 'EQLB1.mdp') + ' -c heat.gro -p topol-' + who + '-solv.top -o eqlb1.tpr -maxwarn 2',
                             shell=True)
             subprocess.call('gmx mdrun -v -deffnm eqlb1',
                             shell=True)
 
         # EQLB2
-        if not os.path.isfile('eqlb2.trr'):
+        if not os.path.isfile('eqlb2.gro'):
             subprocess.call('gmx grompp -f ' + os.path.join(self.static_dir, 'EQLB2.mdp') + ' -c eqlb1.gro -p topol-' + who + '-solv.top -o eqlb2.tpr -maxwarn 2',
                             shell=True)
             subprocess.call('gmx mdrun -v -deffnm eqlb2',
                             shell=True)
 
         # PROD
-        subprocess.call('gmx grompp -f ' + os.path.join(self.static_dir, 'PROD.mdp') + ' -c eqlb2.gro -p topol-' + who + '-solv.top -o prod.tpr -maxwarn 2',
-                        shell=True)
-        subprocess.call('gmx mdrun -v -deffnm prod',
-                        shell=True)
+        if not os.path.isfile('prod.gro'):
+            subprocess.call('gmx grompp -f ' + os.path.join(self.static_dir, 'PROD.mdp') + ' -c eqlb2.gro -p topol-' + who + '-solv.top -o prod.tpr -maxwarn 2',
+                            shell=True)
+            subprocess.call('gmx mdrun -v -deffnm prod',
+                            shell=True)
 
 
 class SolvateBound(Solvate):
@@ -176,8 +177,12 @@ class SolvateBound(Solvate):
             self.files_to_store.append('complex-cubic-box-solv-ions.pdb')
 
         # Run dynamics
-        if not os.path.isfile('prod.tpr') and not os.path.isfile('STORE/prod.tpr'):
+        if not os.path.isfile('STORE/prod.gro') or not os.path.isfile('STORE/prod.tpr'):
             self.run_dynamics('complex')
+            check_step('prod.tpr')
+            check_step('prod.xtc')
+            check_step('prod.cpt')
+            check_step('prod.gro')
             self.files_to_store.append('prod.tpr')
             self.files_to_store.append('prod.xtc')
             self.files_to_store.append('prod.cpt')
@@ -235,10 +240,16 @@ class SolvateUnbound(Solvate):
             self.files_to_store.append('ligand-cubic-box-solv-ions.pdb')
 
         # Run dynamics
-        if not os.path.isfile('prod.trr') and not os.path.isfile('STORE/prod.tpr'):
+        if not os.path.isfile('STORE/prod.gro') or not os.path.isfile('STORE/prod.tpr'):
             self.run_dynamics('ligand')
+            check_step('prod.tpr')
+            check_step('prod.xtc')
+            check_step('prod.cpt')
+            check_step('prod.gro')
             self.files_to_store.append('prod.tpr')
             self.files_to_store.append('prod.xtc')
+            self.files_to_store.append('prod.cpt')
+            self.files_to_store.append('prod.gro')
 
         self.store_files()
 

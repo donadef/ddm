@@ -10,12 +10,10 @@ from .base import DDMClass, check_step, clean_md_files, compute_std, compute_flu
 from .vba import Bound
 
 
-class Alchemical:
-    def __init__(self):
-        self.ll_list = ['00', '01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23']
+ll_list = ['00', '01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23']
 
 
-class AlchemicalBound(Bound, Alchemical):
+class AlchemicalBound(Bound):
     def __init__(self, config, guest, x0, kappa_max, krms_max):
         super(AlchemicalBound, self).__init__(config, guest, x0, kappa_max, krms_max)
         self.directory = os.path.join(self.dest, '08-alchemical-bound')
@@ -46,7 +44,7 @@ class AlchemicalBound(Bound, Alchemical):
             f.close()
             prodfile_data = prodfile_data.replace('XXXXX', self.guest.name)
 
-            for ll in self.ll_list:
+            for ll in ll_list:
                 if not os.path.isfile('dhdl-files/production-lambda_' + ll + '.xvg'):
 
                     new_plumedfile_data = plumedfile_data.replace('KK1', str(self.kappa_max[0]))
@@ -76,16 +74,16 @@ class AlchemicalBound(Bound, Alchemical):
                     clean_md_files()
             os.remove('plumed.dat')
 
-        xvg_list = ['dhdl-files/production-lambda_' + ll + '.xvg' for ll in self.ll_list]
+        xvg_list = ['dhdl-files/production-lambda_' + ll + '.xvg' for ll in ll_list]
         u_nk = pd.concat([extract_u_nk(xvg, T=300) for xvg in xvg_list])
         mbar = MBAR().fit(u_nk)
 
-        self.dG.append(mbar.delta_f_.iloc[0, len(xvg_list)])
+        self.dG.append(mbar.delta_f_.iloc[0, len(xvg_list)-1])
 
         return self.dG
 
 
-class AlchemicalUnbound(Alchemical, DDMClass):
+class AlchemicalUnbound(DDMClass):
     def __init__(self, config, guest):
         super(AlchemicalUnbound, self).__init__(config)
         self.directory = os.path.join(self.dest, '09-alchemical-unbound')
@@ -114,7 +112,7 @@ class AlchemicalUnbound(Alchemical, DDMClass):
             f.close()
             prodfile_data = prodfile_data.replace('XXXXX', self.guest.name)
 
-            for ll in self.ll_list:
+            for ll in ll_list:
                 if not os.path.isfile('dhdl-files/production-lambda_' + ll + '.xvg'):
                     new_prodfile_data = prodfile_data.replace('YYYYY', str(int(ll)))
 
@@ -122,7 +120,7 @@ class AlchemicalUnbound(Alchemical, DDMClass):
                     f.write(new_prodfile_data)
                     f.close()
 
-                    subprocess.call('gmx grompp -f PRODUCTION.mdp -c ' + os.path.join(self.prev_store, 'prod.gro') + ' -t ' + os.path.join(self.prev_store, 'prod.cpt') + ' -p topol-complex-solv.top -o production.tpr -maxwarn 2',
+                    subprocess.call('gmx grompp -f PRODUCTION.mdp -c ' + os.path.join(self.prev_store, 'prod.gro') + ' -t ' + os.path.join(self.prev_store, 'prod.cpt') + ' -p topol-ligand-solv.top -o production.tpr -maxwarn 2',
                                     shell=True)
                     subprocess.call('gmx mdrun -deffnm production -v',
                                     shell=True)
@@ -131,10 +129,10 @@ class AlchemicalUnbound(Alchemical, DDMClass):
 
                     clean_md_files()
 
-        xvg_list = ['dhdl-files/production-lambda_' + ll + '.xvg' for ll in self.ll_list]
+        xvg_list = ['dhdl-files/production-lambda_' + ll + '.xvg' for ll in ll_list]
         u_nk = pd.concat([extract_u_nk(xvg, T=300) for xvg in xvg_list])
         mbar = MBAR().fit(u_nk)
 
-        self.dG.append(mbar.delta_f_.iloc[0, len(xvg_list)])
+        self.dG.append(mbar.delta_f_.iloc[0, len(xvg_list)-1])
 
         return self.dG
