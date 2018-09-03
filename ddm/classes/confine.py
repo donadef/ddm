@@ -34,7 +34,7 @@ class Confine(DDMClass):
                 lines.append(line)
 
         f = open(output_file, 'w')
-        f.writelines(lines)
+        f.writelines(list(map(lambda x: str(x) + '\n', lines)))
         f.close()
 
     def create_plumed_tmpl(self, type):
@@ -43,7 +43,7 @@ class Confine(DDMClass):
         f.close()
 
         newdata = filedata.replace('XXXXX', self.guest.beg)
-        newdata = newdata.replace('YYYYY', self.guest.end)
+        newdata = newdata.replace('YYYYY', str(int(self.guest.beg) + int(self.guest.nb_at) - 1))
         newdata = newdata.replace('RRRRR', self.guest.name)
 
         return newdata
@@ -123,7 +123,7 @@ class ConfineBound(Confine):
             nn = 1
             prev = os.path.join(self.prev_store_solv, 'prod')
             for ll in [0.001, 0.01, 0.1, 0.2, 0.5, 1.0]:
-                if not os.path.isfile('STORE' + str(ll) + '.rms'):
+                if not os.path.isfile('STORE/' + str(ll) + '.rms'):
                     kk = self.krms_max * ll
 
                     newdata = filedata.replace('KKKKK', str(kk))
@@ -138,7 +138,9 @@ class ConfineBound(Confine):
                                     shell=True)
                     check_step('PLUMED-rmsd')
                     shutil.move('PLUMED-rmsd', 'STORE/' + str(ll) + '.rms')
-                    prev = str(nn)
+                    shutil.move(str(nn) + '.gro', 'STORE/')
+                    shutil.move(str(nn) + '.cpt', 'STORE/')
+                    prev = 'STORE/' + str(nn)
                 else:
                     prev = 'STORE/' + str(nn)
                 nn += 1
@@ -162,9 +164,9 @@ class ConfineBound(Confine):
                     self.flucts.append(line.rstrip('\n'))
 
         if not os.path.isfile('STORE/CONF_BND.dG'):
-            self.dG = compute_trapez(self.flucts, 2)
+            self.dG.append(compute_trapez(self.flucts, 2))
             f = open('STORE/CONF_BND.dG', 'w')
-            f.write(str(self.dG) + '\n')
+            f.writelines(list(map(lambda x: str(x) + '\n', self.dG)))
             f.close()
 
         if not self.dG:
@@ -178,8 +180,8 @@ class ConfineBound(Confine):
 class ConfineUnbound(Confine):
     def __init__(self, config, guest, krms_max):
         super(ConfineUnbound, self).__init__(config, guest)
-        self.directory = os.path.join(self.dest, '05-confine-bound')
-        self.static_dir = os.path.join(self.static_dir, '05-confine-bound')
+        self.directory = os.path.join(self.dest, '10-confine-unbound')
+        self.static_dir = os.path.join(self.static_dir, '10-confine-unbound')
         self.prev_store = os.path.join(self.dest, '04-monitor-CVs/STORE')
         self.prev_store_ref = os.path.join(self.dest, '03-pick-reference/STORE')
         self.prev_store_solv = os.path.join(self.dest, '02-solvate-unbound/STORE')
@@ -199,6 +201,7 @@ class ConfineUnbound(Confine):
 
         # Monitor CV
         if not os.path.isfile('STORE/0.rms'):
+            self.guest.beg = '1'
             filedata = self.create_plumed_tmpl('anal')
             f = open(os.path.join(self.directory, 'plumed_rmsd_anal.inp'), 'w')
             f.write(filedata)
@@ -207,18 +210,19 @@ class ConfineUnbound(Confine):
             subprocess.call('plumed driver --plumed plumed_rmsd_anal.inp --mf_xtc ' + os.path.join(self.prev_store_solv, 'prod.xtc') + ' --timestep 0.002 --trajectory-stride 2500',
                             shell=True)
             check_step('PLUMED.out')
-            shutil.copy('PLUMED.out', 'STORE/0.rms')
+            shutil.move('PLUMED.out', 'STORE/0.rms')
 
         if not os.path.isfile('STORE/1.0.rms'):
             # Copy the topol file here
-            shutil.copy(os.path.join(self.prev_store_solv, 'topol-complex-solv.top'), self.directory)
+            shutil.copy(os.path.join(self.prev_store_solv, 'topol-ligand-solv.top'), self.directory)
 
+            self.guest.beg = '1'
             filedata = self.create_plumed_tmpl('bias')
 
             nn = 1
             prev = os.path.join(self.prev_store_solv, 'prod')
             for ll in [0.001, 0.01, 0.1, 0.2, 0.5, 1.0]:
-                if not os.path.isfile('STORE' + str(ll) + '.rms'):
+                if not os.path.isfile('STORE/' + str(ll) + '.rms'):
                     kk = self.krms_max * ll
 
                     newdata = filedata.replace('KKKKK', str(kk))
@@ -227,13 +231,15 @@ class ConfineUnbound(Confine):
                     f.write(newdata)
                     f.close()
 
-                    subprocess.call('gmx grompp -f '+ os.path.join(self.static_dir, 'PRODUCTION.mdp') + ' -c ' + prev + '.gro -t ' + prev + '.cpt -p topol-complex-solv.top -o ' + str(nn) + '.tpr -maxwarn 2',
+                    subprocess.call('gmx grompp -f ' + os.path.join(self.static_dir, 'PRODUCTION.mdp') + ' -c ' + prev + '.gro -t ' + prev + '.cpt -p topol-ligand-solv.top -o ' + str(nn) + '.tpr -maxwarn 2',
                                      shell=True)
                     subprocess.call('gmx_d mdrun -deffnm ' + str(nn) + ' -plumed plumed.dat -v',
                                     shell=True)
                     check_step('PLUMED-rmsd')
                     shutil.move('PLUMED-rmsd', 'STORE/' + str(ll) + '.rms')
-                    prev = str(nn)
+                    shutil.move(str(nn) + '.gro', 'STORE/')
+                    shutil.move(str(nn) + '.cpt', 'STORE/')
+                    prev = 'STORE/' + str(nn)
                 else:
                     prev = 'STORE/' + str(nn)
                 nn += 1
@@ -254,9 +260,9 @@ class ConfineUnbound(Confine):
                     self.flucts.append(line.rstrip('\n'))
 
         if not os.path.isfile('STORE/CONF_BND.dG'):
-            self.dG = compute_trapez(self.flucts, 2)
+            self.dG.append(compute_trapez(self.flucts, 2))
             f = open('STORE/CONF_BND.dG', 'w')
-            f.write(str(self.dG) + '\n')
+            f.writelines(list(map(lambda x: str(x) + '\n', self.dG)))
             f.close()
 
         if not self.dG:

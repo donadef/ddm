@@ -61,6 +61,7 @@ def compute_kf(std):
 def compute_kf_plus(kf):
     if kf > 10:
         n = np.format_float_scientific(kf)
+        # kf_plus = str(1)
         kf_plus = str(n.split('e')[0][0])
         for e in range(int(n.split('e')[1]) + 1):
             kf_plus += '0'
@@ -161,6 +162,7 @@ class Guest:
         self.pdb = self.create_pdb()
 
         self.beg = self.find_beg()
+        self.nb_at = self.find_nb_atom()
         self.end = self.find_end()
 
     def create_pdb(self):
@@ -188,6 +190,12 @@ class Guest:
             if 'ATOM' in self.pdb[-i]:
                 return self.pdb[-i].split()[1]
 
+    def find_nb_atom(self):
+        nb = 0
+        for i in range(len(self.pdb)):
+            if 'ATOM' in self.pdb[i]:
+                nb += 1
+        return nb
 
 class Host:
     def __init__(self, host_name, complex_obj, dest):
