@@ -41,6 +41,19 @@ def clean_tmp():
         os.remove('TMP')
 
 
+def compute_mean(col,file):
+    lcol = []
+    with open(file, 'r') as file:
+        for line in file:
+            if not line.startswith('#'):
+                c = line.lstrip(' ').rstrip('\n').split(' ')[col - 1]
+                lcol.append(float(c))
+    a = np.array(lcol)
+    # Compute the standard deviation
+    mean = np.mean(a)
+    return float(mean)
+
+
 def compute_std(col, file):
     lcol = []
     with open(file, 'r') as file:
@@ -61,7 +74,6 @@ def compute_kf(std):
 def compute_kf_plus(kf):
     if kf > 10:
         n = np.format_float_scientific(kf)
-        # kf_plus = str(1)
         kf_plus = str(n.split('e')[0][0])
         for e in range(int(n.split('e')[1]) + 1):
             kf_plus += '0'
@@ -109,11 +121,11 @@ def compute_work(kappa):
 
     # positional restrain
     Ztr = 1.66058  # nm^3/molecule (volume/molecule @ 1M)
-    Ztr_R = (kappa[6] ** 2) * math.sin(kappa[7]) * (2 * np.pi * kT) ** (3/2) / math.sqrt(kappa[0] * kappa[1] * kappa[2])
+    Ztr_R = ((kappa[6] ** 2) * math.sin(kappa[7]) * ((2 * np.pi * kT) ** (3/2))) / math.sqrt(kappa[0] * kappa[1] * kappa[2])
 
     # orientation restrain
     Zrot = 8 * (np.pi ** 2)
-    Zrot_R = math.sin(kappa[8]) * (2 * np.pi * kT) / math.sqrt(kappa[3] * kappa[4] * kappa[5])
+    Zrot_R = (math.sin(kappa[8]) * (2 * np.pi * kT)) / math.sqrt(kappa[3] * kappa[4] * kappa[5])
 
     # Restraint work
     Wr = -kT * (math.log(Ztr/Ztr_R) + math.log(Zrot/Zrot_R)) / 4.184  # kcal/mol

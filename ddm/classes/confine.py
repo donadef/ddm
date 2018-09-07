@@ -145,9 +145,6 @@ class ConfineBound(Confine):
                     prev = 'STORE/' + str(nn)
                 nn += 1
 
-            self.files_to_store = ['6.gro', '6.cpt']
-            self.store_files()
-
             os.remove('plumed.dat')
             clean_md_files()
 

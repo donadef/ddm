@@ -69,7 +69,7 @@ class DDM:
         dG_CONF_UB = cf_unbound.run()
         print('dG_CONF_UB', dG_CONF_UB)
 
-        vba_unbound = VbaUnbound(self.config, mon.kappa)
+        vba_unbound = VbaUnbound(self.config, mon.kappa_max)
         dG_VBA_UB, sym_corr = vba_unbound.run()
         print('dG_VBA_UB', dG_VBA_UB, 'sym_corr', sym_corr)
 

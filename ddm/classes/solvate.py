@@ -155,19 +155,18 @@ class SolvateBound(Solvate):
 
         # Create the topol file
         if not os.path.isfile('topol-complex-solv.top') and not os.path.isfile('STORE/topol-complex-solv.top'):
-            if not os.path.isfile('STORE/prod.tpr'):
-                f = open(os.path.join(self.static_dir, 'complex-solv.top'), 'r')
-                filedata = f.read()
-                f.close()
+            f = open(os.path.join(self.static_dir, 'complex-solv.top'), 'r')
+            filedata = f.read()
+            f.close()
 
-                newdata = filedata.replace('XXXXX', self.host.name)
-                newdata = newdata.replace('YYYYY', self.guest.name)
-                newdata = newdata.replace('ZZZZZ', nb_wat)
+            newdata = filedata.replace('XXXXX', self.host.name)
+            newdata = newdata.replace('YYYYY', self.guest.name)
+            newdata = newdata.replace('ZZZZZ', nb_wat)
 
-                f = open('topol-complex-solv.top', 'w')
-                f.write(newdata)
-                f.close()
-                self.files_to_store.append('topol-complex-solv.top')
+            f = open('topol-complex-solv.top', 'w')
+            f.write(newdata)
+            f.close()
+            self.files_to_store.append('topol-complex-solv.top')
         elif not os.path.isfile('topol-complex-solv.top') and os.path.isfile('STORE/topol-complex-solv.top'):
             shutil.copy('STORE/topol-complex-solv.top', self.directory)
 

@@ -5,7 +5,7 @@ import subprocess
 from scipy import constants as c
 import math
 
-from .base import DDMClass, check_step, clean_md_files, compute_std, compute_fluct, compute_trapez, compute_work
+from .base import DDMClass, check_step, clean_md_files, compute_mean, compute_fluct, compute_trapez, compute_work
 
 
 class Bound(DDMClass):
@@ -134,12 +134,12 @@ def compute_sym_corr(sigma_l, sigma_p, sigma_pl):
 
 
 class VbaUnbound(DDMClass):
-    def __init__(self, config, kappa):
+    def __init__(self, config, kappa_max):
         super(VbaUnbound, self).__init__(config)
         self.directory = os.path.join(self.dest, '07-work-unbound')
         self.prev_store = os.path.join(self.dest, '06-vba-bound/STORE')
 
-        self.kappa = kappa
+        self.kappa = kappa_max
         self.dG = []
         self.sym_corr = []
 
@@ -150,8 +150,8 @@ class VbaUnbound(DDMClass):
             os.makedirs('STORE')
 
         if not os.path.isfile('STORE/VBA_UB.dG'):
-            for col in [2, 3, 4]:
-                self.kappa.append(compute_std(col, os.path.join(self.prev_store, '1.0.vba')))
+            for col in [2, 4, 8]:
+                self.kappa.append(compute_mean(col, os.path.join(self.prev_store, '1.0.vba')))
 
             self.dG.append(compute_work(self.kappa))
             f = open('STORE/VBA_UB.dG', 'w')

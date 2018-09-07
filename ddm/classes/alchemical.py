@@ -5,6 +5,7 @@ import subprocess
 from alchemlyb.parsing.gmx import extract_u_nk
 import pandas as pd
 from alchemlyb.estimators import MBAR
+from scipy import constants as c
 
 from .base import DDMClass, check_step, clean_md_files, compute_std, compute_fluct, compute_trapez, compute_work
 from .vba import Bound
@@ -78,7 +79,7 @@ class AlchemicalBound(Bound):
         u_nk = pd.concat([extract_u_nk(xvg, T=300) for xvg in xvg_list])
         mbar = MBAR().fit(u_nk)
 
-        self.dG.append(mbar.delta_f_.iloc[0, len(xvg_list)-1])
+        self.dG.append(mbar.delta_f_.iloc[0, len(xvg_list)-1] * c.Boltzmann * c.N_A / (4.184 * 1000) * 300)
 
         return self.dG
 
@@ -133,6 +134,6 @@ class AlchemicalUnbound(DDMClass):
         u_nk = pd.concat([extract_u_nk(xvg, T=300) for xvg in xvg_list])
         mbar = MBAR().fit(u_nk)
 
-        self.dG.append(mbar.delta_f_.iloc[0, len(xvg_list)-1])
+        self.dG.append(mbar.delta_f_.iloc[0, len(xvg_list)-1] * c.Boltzmann * c.N_A / (4.184 * 1000) * 300)
 
         return self.dG
