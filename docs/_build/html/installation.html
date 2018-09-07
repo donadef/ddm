@@ -56,8 +56,13 @@ you through the process.</p>
 <div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$</span> curl  -OL https://github.com/donadef/ddm/tarball/master
 </pre></div>
 </div>
-<p>Once you have a copy of the source, you can install it with:</p>
-<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$</span> python setup.py install
+<p>Once you have a copy of the source (it is recommanded to create a virtual environment), you can install it with:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$</span> pip isntall -r requirements.txt
+<span class="gp">$</span> python setup.py install
+</pre></div>
+</div>
+<p>If you want to be able to launch calculation using only the ‘ddm’ command, use:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$</span> pip install --editable .
 </pre></div>
 </div>
 </div>
