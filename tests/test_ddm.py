@@ -7,7 +7,6 @@ import pytest
 
 from click.testing import CliRunner
 
-from ddm import ddm
 from ddm import ddm_cli
 
 

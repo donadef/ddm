@@ -3,13 +3,13 @@ import os
 import shutil
 import subprocess
 
-from .base import DDMClass, clean_md_files, clean_tmp, check_step
+from .base import DDMClass, clean_md_files, clean_tmp, check_step, ORGANIZE
 
 
 class Solvate(DDMClass):
     def __init__(self, config):
         super(Solvate, self).__init__(config)
-        self.prev_store = os.path.join(self.dest, '00-modeling/STORE')
+        self.prev_store = os.path.join(self.dest, ORGANIZE['modeling'], 'STORE')
 
     def prepare_simulation_box(self, who):
         """
@@ -129,8 +129,8 @@ class Solvate(DDMClass):
 class SolvateBound(Solvate):
     def __init__(self, config, guest, host):
         super(SolvateBound, self).__init__(config)
-        self.directory = os.path.join(self.dest, '01-solvate-bound')
-        self.static_dir = os.path.join(self.static_dir, '01-solvate-bound')
+        self.directory = os.path.join(self.dest, ORGANIZE['solvate-bound'])
+        self.static_dir = os.path.join(self.static_dir, 'solvate-bound')
 
         self.guest = guest
         self.host = host
@@ -166,7 +166,9 @@ class SolvateBound(Solvate):
             f = open('topol-complex-solv.top', 'w')
             f.write(newdata)
             f.close()
+
             self.files_to_store.append('topol-complex-solv.top')
+            self.store_files()
         elif not os.path.isfile('topol-complex-solv.top') and os.path.isfile('STORE/topol-complex-solv.top'):
             shutil.copy('STORE/topol-complex-solv.top', self.directory)
 
@@ -174,6 +176,7 @@ class SolvateBound(Solvate):
         if not os.path.isfile('complex-cubic-box-solv-ions.pdb') and not os.path.isfile('STORE/complex-cubic-box-solv-ions.pdb'):
             self.ionize('complex')
             self.files_to_store.append('complex-cubic-box-solv-ions.pdb')
+            self.store_files()
 
         # Run dynamics
         if not os.path.isfile('STORE/prod.gro') or not os.path.isfile('STORE/prod.tpr'):
@@ -195,8 +198,8 @@ class SolvateBound(Solvate):
 class SolvateUnbound(Solvate):
     def __init__(self, config, guest):
         super(SolvateUnbound, self).__init__(config)
-        self.directory = os.path.join(self.dest, '02-solvate-unbound')
-        self.static_dir = os.path.join(self.static_dir, '02-solvate-unbound')
+        self.directory = os.path.join(self.dest, ORGANIZE['solvate-unbound'])
+        self.static_dir = os.path.join(self.static_dir, 'solvate-unbound')
 
         self.guest = guest
 

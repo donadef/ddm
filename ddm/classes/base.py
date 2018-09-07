@@ -7,6 +7,20 @@ from scipy import constants as c
 import math
 
 
+ORGANIZE = {'modeling': 'modeling',
+            'solvate-bound': 'solvate-bound',
+            'solvate-unbound': 'solvate-unbound',
+            'pick-reference': 'pick-reference',
+            'monitor-CVs': 'monitor-CVs',
+            'confine-bound': 'confine-bound',
+            'vba-bound': 'vba-bound',
+            'alchemical-bound': 'alchemical-bound',
+            'confine-unbound': 'confine-unbound',
+            'vba-unbound': 'vba-unbound',
+            'alchemical-unbound': 'alchemical-unbound',
+            }
+
+
 def check_step(file):
     if not os.path.isfile(file):
         print("""

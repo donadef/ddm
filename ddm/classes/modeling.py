@@ -4,14 +4,14 @@ import shutil
 import subprocess
 
 from tools import cgenff_charmm2gmx
-from .base import DDMClass, clean_md_files, clean_tmp
+from .base import DDMClass, clean_md_files, clean_tmp, ORGANIZE
 
 
 class Modeling(DDMClass):
     def __init__(self, config, guest, host, complex):
         super(Modeling, self).__init__(config)
-        self.directory = os.path.join(self.dest, '00-modeling')
-        self.static_dir = os.path.join(self.static_dir, '00-modeling')
+        self.directory = os.path.join(self.dest, ORGANIZE['modeling'])
+        self.static_dir = os.path.join(self.static_dir, 'modeling')
 
         self.guest = guest
         self.host = host

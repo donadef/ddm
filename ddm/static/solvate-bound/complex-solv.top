@@ -1,15 +1,15 @@
 ; Defining the main source of the force field parameters 
 #include "charmm36-jul2017.ff/forcefield.itp"
 ; Additional parameters for the molecules
-#include "../00-modeling/STORE/XXXXX.prm"
-#include "../00-modeling/STORE/YYYYY.prm"
+#include "../modeling/STORE/XXXXX.prm"
+#include "../modeling/STORE/YYYYY.prm"
 ; Additional topology for the molecules
-#include "../00-modeling/STORE/XXXXX.itp"
+#include "../modeling/STORE/XXXXX.itp"
 ; Solute position restraints
 #ifdef POSRES
 #include "XXXXX-posre.itp"
 #endif
-#include "../00-modeling/STORE/YYYYY.itp"
+#include "../modeling/STORE/YYYYY.itp"
 ; Solute position restraints
 #ifdef POSRES
 #include "YYYYY-posre.itp"

@@ -7,7 +7,7 @@ import pandas as pd
 from alchemlyb.estimators import MBAR
 from scipy import constants as c
 
-from .base import DDMClass, check_step, clean_md_files, compute_std, compute_fluct, compute_trapez, compute_work
+from .base import DDMClass, check_step, clean_md_files, ORGANIZE
 from .vba import Bound
 
 
@@ -17,11 +17,11 @@ ll_list = ['00', '01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11
 class AlchemicalBound(Bound):
     def __init__(self, config, guest, x0, kappa_max, krms_max):
         super(AlchemicalBound, self).__init__(config, guest, x0, kappa_max, krms_max)
-        self.directory = os.path.join(self.dest, '08-alchemical-bound')
-        self.static_dir = os.path.join(self.static_dir, '08-alchemical-bound')
-        self.prev_store = os.path.join(self.dest, '06-vba-bound/STORE')
-        self.prev_store_6 = os.path.join(self.dest, '05-confine-bound/STORE')
-        self.prev_store_solv = os.path.join(self.dest, '01-solvate-bound/STORE')
+        self.directory = os.path.join(self.dest, ORGANIZE['alchemical-bound'])
+        self.static_dir = os.path.join(self.static_dir, 'alchemical-bound')
+        self.prev_store = os.path.join(self.dest, ORGANIZE['vba-bound'], 'STORE')
+        self.prev_store_6 = os.path.join(self.dest, ORGANIZE['confine-bound'], 'STORE')
+        self.prev_store_solv = os.path.join(self.dest, ORGANIZE['solvate-bound'], 'STORE')
 
         self.dG = []
 
@@ -75,11 +75,21 @@ class AlchemicalBound(Bound):
                     clean_md_files()
             os.remove('plumed.dat')
 
-        xvg_list = ['dhdl-files/production-lambda_' + ll + '.xvg' for ll in ll_list]
-        u_nk = pd.concat([extract_u_nk(xvg, T=300) for xvg in xvg_list])
-        mbar = MBAR().fit(u_nk)
+        if not os.path.isfile('STORE/ALCH_BND.dG'):
+            xvg_list = ['dhdl-files/production-lambda_' + ll + '.xvg' for ll in ll_list]
+            u_nk = pd.concat([extract_u_nk(xvg, T=300) for xvg in xvg_list])
+            mbar = MBAR().fit(u_nk)
 
-        self.dG.append(mbar.delta_f_.iloc[0, len(xvg_list)-1] * c.Boltzmann * c.N_A / (4.184 * 1000) * 300)
+            self.dG.append(mbar.delta_f_.iloc[0, len(xvg_list) - 1] * c.Boltzmann * c.N_A / (4.184 * 1000) * 300)
+
+            f = open('STORE/ALCH_BND.dG', 'w')
+            f.writelines(list(map(lambda x: str(x) + '\n', self.dG)))
+            f.close()
+
+        if not self.dG:
+            with open('STORE/ALCH_BND.dG', 'r') as file:
+                for line in file:
+                    self.dG.append(float(line.rstrip('\n')))
 
         return self.dG
 
@@ -87,9 +97,9 @@ class AlchemicalBound(Bound):
 class AlchemicalUnbound(DDMClass):
     def __init__(self, config, guest):
         super(AlchemicalUnbound, self).__init__(config)
-        self.directory = os.path.join(self.dest, '09-alchemical-unbound')
-        self.static_dir = os.path.join(self.static_dir, '09-alchemical-unbound')
-        self.prev_store = os.path.join(self.dest, '02-solvate-unbound/STORE')
+        self.directory = os.path.join(self.dest, ORGANIZE['alchemical-unbound'])
+        self.static_dir = os.path.join(self.static_dir, 'alchemical-unbound')
+        self.prev_store = os.path.join(self.dest, ORGANIZE['solvate-unbound'], 'STORE')
 
         self.guest = guest
 
@@ -130,10 +140,20 @@ class AlchemicalUnbound(DDMClass):
 
                     clean_md_files()
 
-        xvg_list = ['dhdl-files/production-lambda_' + ll + '.xvg' for ll in ll_list]
-        u_nk = pd.concat([extract_u_nk(xvg, T=300) for xvg in xvg_list])
-        mbar = MBAR().fit(u_nk)
+        if not os.path.isfile('STORE/ALCH_UB.dG'):
+            xvg_list = ['dhdl-files/production-lambda_' + ll + '.xvg' for ll in ll_list]
+            u_nk = pd.concat([extract_u_nk(xvg, T=300) for xvg in xvg_list])
+            mbar = MBAR().fit(u_nk)
 
-        self.dG.append(mbar.delta_f_.iloc[0, len(xvg_list)-1] * c.Boltzmann * c.N_A / (4.184 * 1000) * 300)
+            self.dG.append(mbar.delta_f_.iloc[0, len(xvg_list) - 1] * c.Boltzmann * c.N_A / (4.184 * 1000) * 300)
+
+            f = open('STORE/ALCH_UB.dG', 'w')
+            f.writelines(list(map(lambda x: str(x) + '\n', self.dG)))
+            f.close()
+
+        if not self.dG:
+            with open('STORE/ALCH_UB.dG', 'r') as file:
+                for line in file:
+                    self.dG.append(float(line.rstrip('\n')))
 
         return self.dG

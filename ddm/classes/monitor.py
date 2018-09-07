@@ -2,16 +2,17 @@
 import os
 import subprocess
 
-from .base import DDMClass, check_step, compute_std, compute_kf, compute_kf_plus
+from .base import DDMClass, check_step, compute_std, compute_kf, compute_kf_plus, ORGANIZE
 
 
 class MonitorCVs(DDMClass):
     def __init__(self, config):
         super(MonitorCVs, self).__init__(config)
 
-        self.prev_store = os.path.join(self.dest, '03-pick-reference/STORE')
-        self.prev_store_solv = os.path.join(self.dest, '01-solvate-bound/STORE')
-        self.directory = os.path.join(self.dest, '04-monitor-CVs')
+        self.prev_store = os.path.join(self.dest, ORGANIZE['pick-reference'], 'STORE')
+        self.prev_store_solv = os.path.join(self.dest, ORGANIZE['solvate-bound'], 'STORE')
+        self.directory = os.path.join(self.dest, ORGANIZE['monitor-CVs'])
+        self.config = self.config['monitor-CVs']
 
         self.x0 = []
         self.kappa = []
@@ -47,47 +48,33 @@ class MonitorCVs(DDMClass):
                 for line in file:
                     self.x0.append(float(line.rstrip('\n')))
 
+
         # Monitor POS and ORIE of ligand in unbiased MD
-        if not os.path.isfile('STORE/file.kappa'):
+        if not os.path.isfile('STORE/file_max.kappa'):
+            # if the over-estimated restrains are not in the config file, compute them
+            if not self.config['rr'] or not self.config['tt'] or not self.config['phi'] or not self.config['TT'] or not self.config['PHI'] or not self.config['PSI']:
+                subprocess.call('plumed driver --plumed ' + os.path.join(self.prev_store, 'vba.dat') + ' --mf_xtc ' + os.path.join(self.prev_store_solv, 'prod.xtc') + ' --timestep 0.002',
+                                shell=True)
+
+                check_step('COLVAR-rest')
+                self.files_to_store = ['COLVAR-rest']
+                self.store_files()
+
+                std_cvs = []
+                for col in range(2, 8):
+                    std_cvs.append(compute_std(col, 'COLVAR-rest'))
+
+                # Compute Kfs
+                self.kappa = list(map(compute_kf, std_cvs))
+
+                os.remove('COLVAR-rest')
+                self.kappa_max = list(map(compute_kf_plus, self.kappa))
+            # if the over-estimated restrains are in the config file, just save them in self.kappa_max
+            else:
+                self.kappa_max = [self.config['rr'], self.config['tt'], self.config['phi'],
+                                  self.config['TT_'], self.config['PHI_'], self.config['PSI']]
             if not os.path.exists('STORE'):
                 os.makedirs('STORE')
-
-            subprocess.call('plumed driver --plumed ' + os.path.join(self.prev_store, 'vba.dat') + ' --mf_xtc ' + os.path.join(self.prev_store_solv, 'prod.xtc') + ' --timestep 0.002',
-                            shell=True)
-
-            check_step('COLVAR-rest')
-            self.files_to_store = ['COLVAR-rest']
-            self.store_files()
-
-            # Plot distributions
-            # nb_bin = subprocess.check_output("wc COLVAR-rest | awk '{print sqrt($1)}'", shell=True)
-            # subprocess.call('awk -f ' + os.path.join(self.awk_dir, 'histo.awk') + ' -v col=2 -v NBIN=' + nb_bin + ' COLVAR-rest > rr.hh', shell=True)
-            # subprocess.call('awk -f ' + os.path.join(self.awk_dir, 'histo.awk') + ' -v col=3 -v NBIN=' + nb_bin + ' COLVAR-rest > tt.hh', shell=True)
-            # subprocess.call('awk -f ' + os.path.join(self.awk_dir, 'histo.awk') + ' -v col=4 -v NBIN=' + nb_bin + ' COLVAR-rest > phi.hh', shell=True)
-            # subprocess.call('awk -f ' + os.path.join(self.awk_dir, 'histo.awk') + ' -v col=5 -v NBIN=' + nb_bin + ' COLVAR-rest > TT.hh', shell=True)
-            # subprocess.call('awk -f ' + os.path.join(self.awk_dir, 'histo.awk') + ' -v col=6 -v NBIN=' + nb_bin + ' COLVAR-rest > PHI.hh', shell=True)
-            # subprocess.call('awk -f ' + os.path.join(self.awk_dir, 'histo.awk') + ' -v col=7 -v NBIN=' + nb_bin + ' COLVAR-rest > PSI.hh', shell=True)
-
-            std_cvs = []
-            for col in range(2, 8):
-                std_cvs.append(compute_std(col, 'COLVAR-rest'))
-
-            # Compute Kfs
-            self.kappa = list(map(compute_kf, std_cvs))
-            f = open('STORE/file.kappa', 'w')
-            f.writelines(list(map(lambda x: str(x) + '\n', self.kappa)))
-            f.close()
-
-            os.remove('COLVAR-rest')
-            check_step('STORE/file.kappa')
-
-        if not self.kappa:
-            with open('STORE/file.kappa', 'r') as file:
-                for line in file:
-                    self.kappa.append(float(line.rstrip('\n')))
-
-        if not os.path.isfile('STORE/file_max.kappa'):
-            self.kappa_max = list(map(compute_kf_plus, self.kappa))
             f = open('STORE/file_max.kappa', 'w')
             f.writelines(list(map(lambda x: str(x) + '\n', self.kappa_max)))
             f.close()

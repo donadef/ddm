@@ -14,8 +14,6 @@ Double Decoupling Method (DDM)
         :alt: Documentation Status
 
 
-
-
 ddm allows binding free energy for a complex, using the double decoupling method.
 
 

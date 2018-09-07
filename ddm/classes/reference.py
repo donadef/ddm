@@ -2,17 +2,17 @@
 import os
 import subprocess
 
-from .base import DDMClass, check_step, clean_tmp, clean_md_files
+from .base import DDMClass, check_step, clean_tmp, clean_md_files, ORGANIZE
 
 
 class PickReference(DDMClass):
     def __init__(self, config):
         super(PickReference, self).__init__(config)
 
-        self.prev_store = os.path.join(self.dest, '00-modeling/STORE')
-        self.prev_store_solv = os.path.join(self.dest, '01-solvate-bound/STORE')
-        self.directory = os.path.join(self.dest, '03-pick-reference')
-        self.static_dir = os.path.join(self.static_dir, '03-pick-reference')
+        self.prev_store = os.path.join(self.dest, ORGANIZE['modeling'], 'STORE')
+        self.prev_store_solv = os.path.join(self.dest, ORGANIZE['solvate-bound'], 'STORE')
+        self.directory = os.path.join(self.dest, ORGANIZE['pick-reference'])
+        self.static_dir = os.path.join(self.static_dir, 'pick-reference')
 
     def run(self):
         super(PickReference, self).run()
@@ -65,12 +65,12 @@ class PickReference(DDMClass):
             filedata = f.read()
             f.close()
 
-            newdata = filedata.replace('P1', self.config['03-pick-reference']['P1'])
-            newdata = newdata.replace('P2', self.config['03-pick-reference']['P2'])
-            newdata = newdata.replace('P3', self.config['03-pick-reference']['P3'])
-            newdata = newdata.replace('L1', self.config['03-pick-reference']['L1'])
-            newdata = newdata.replace('L2', self.config['03-pick-reference']['L2'])
-            newdata = newdata.replace('L3', self.config['03-pick-reference']['L3'])
+            newdata = filedata.replace('P1', self.config['pick-reference']['P1'])
+            newdata = newdata.replace('P2', self.config['pick-reference']['P2'])
+            newdata = newdata.replace('P3', self.config['pick-reference']['P3'])
+            newdata = newdata.replace('L1', self.config['pick-reference']['L1'])
+            newdata = newdata.replace('L2', self.config['pick-reference']['L2'])
+            newdata = newdata.replace('L3', self.config['pick-reference']['L3'])
 
             f = open(os.path.join(self.directory, 'STORE/vba.dat'), 'w')
             f.write(newdata)

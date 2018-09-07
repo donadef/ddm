@@ -3,7 +3,8 @@ import os
 import shutil
 import subprocess
 
-from .base import DDMClass, check_step, clean_md_files, compute_std, compute_kf, compute_kf_plus, compute_fluct, compute_trapez
+from .base import DDMClass, check_step, clean_md_files, compute_std, \
+    compute_kf, compute_kf_plus, compute_fluct, compute_trapez, ORGANIZE
 
 
 class Confine(DDMClass):
@@ -52,11 +53,12 @@ class Confine(DDMClass):
 class ConfineBound(Confine):
     def __init__(self, config, guest):
         super(ConfineBound, self).__init__(config, guest)
-        self.directory = os.path.join(self.dest, '05-confine-bound')
-        self.static_dir = os.path.join(self.static_dir, '05-confine-bound')
-        self.prev_store = os.path.join(self.dest, '04-monitor-CVs/STORE')
-        self.prev_store_ref = os.path.join(self.dest, '03-pick-reference/STORE')
-        self.prev_store_solv = os.path.join(self.dest, '01-solvate-bound/STORE')
+        self.directory = os.path.join(self.dest, ORGANIZE['confine-bound'])
+        self.static_dir = os.path.join(self.static_dir, 'confine-bound')
+        self.prev_store = os.path.join(self.dest, ORGANIZE['monitor-CVs'], 'STORE')
+        self.prev_store_ref = os.path.join(self.dest, ORGANIZE['pick-reference'], 'STORE')
+        self.prev_store_solv = os.path.join(self.dest, ORGANIZE['solvate-bound'], 'STORE')
+        self.config = self.config['confine-bound']
 
         self.krms = ''
         self.krms_max = ''
@@ -87,23 +89,18 @@ class ConfineBound(Confine):
             shutil.copy('PLUMED.out', 'STORE/0.rms')
 
         # Evaluate k_unbiased by QHA and kf
-        if not os.path.isfile('STORE/file.kappa'):
-            std_c1 = compute_std(2, 'STORE/0.rms')
-
-            # Compute Kf
-            self.krms = compute_kf(std_c1)
-            f = open('STORE/file.krms', 'w')
-            f.write(str(self.krms) + '\n')
-            f.close()
-            check_step('STORE/file.krms')
-
-        if self.krms == '':
-            f = open('STORE/file.krms', 'r')
-            self.krms = float(f.read())
-            f.close()
-
         if not os.path.isfile('STORE/file_max.krms'):
-            self.krms_max = float(compute_kf_plus(self.krms))
+            # if not in config, compute.
+            if not self.config['rms']:
+                std_c1 = compute_std(2, 'STORE/0.rms')
+
+                # Compute Kf
+                self.krms = compute_kf(std_c1)
+                self.krms_max = float(compute_kf_plus(self.krms))
+            # if in config, store
+            else:
+                self.krms_max = self.config['rms']
+
             f = open('STORE/file_max.krms', 'w')
             f.write(str(self.krms_max) + '\n')
             f.close()
@@ -177,11 +174,11 @@ class ConfineBound(Confine):
 class ConfineUnbound(Confine):
     def __init__(self, config, guest, krms_max):
         super(ConfineUnbound, self).__init__(config, guest)
-        self.directory = os.path.join(self.dest, '10-confine-unbound')
-        self.static_dir = os.path.join(self.static_dir, '10-confine-unbound')
-        self.prev_store = os.path.join(self.dest, '04-monitor-CVs/STORE')
-        self.prev_store_ref = os.path.join(self.dest, '03-pick-reference/STORE')
-        self.prev_store_solv = os.path.join(self.dest, '02-solvate-unbound/STORE')
+        self.directory = os.path.join(self.dest, ORGANIZE['confine-unbound'])
+        self.static_dir = os.path.join(self.static_dir, 'confine-unbound')
+        self.prev_store = os.path.join(self.dest, ORGANIZE['monitor-CVs'], 'STORE')
+        self.prev_store_ref = os.path.join(self.dest, ORGANIZE['pick-reference'], 'STORE')
+        self.prev_store_solv = os.path.join(self.dest, ORGANIZE['solvate-unbound'], 'STORE')
 
         self.krms_max = krms_max
         self.flucts = []

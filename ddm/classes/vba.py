@@ -5,7 +5,7 @@ import subprocess
 from scipy import constants as c
 import math
 
-from .base import DDMClass, check_step, clean_md_files, compute_mean, compute_fluct, compute_trapez, compute_work
+from .base import DDMClass, check_step, clean_md_files, compute_mean, compute_fluct, compute_trapez, compute_work, ORGANIZE
 
 
 class Bound(DDMClass):
@@ -41,10 +41,10 @@ class Bound(DDMClass):
 class VbaBound(Bound):
     def __init__(self, config, guest, x0, kappa_max, krms_max):
         super(VbaBound, self).__init__(config, guest, x0, kappa_max, krms_max)
-        self.directory = os.path.join(self.dest, '06-vba-bound')
-        self.static_dir = os.path.join(self.static_dir, '06-vba-bound')
-        self.prev_store = os.path.join(self.dest, '05-confine-bound/STORE')
-        self.prev_store_solv = os.path.join(self.dest, '01-solvate-bound/STORE')
+        self.directory = os.path.join(self.dest, ORGANIZE['vba-bound'])
+        self.static_dir = os.path.join(self.static_dir, 'vba-bound')
+        self.prev_store = os.path.join(self.dest, ORGANIZE['confine-bound'], 'STORE')
+        self.prev_store_solv = os.path.join(self.dest, ORGANIZE['solvate-bound'], 'STORE')
 
         self.flucts = []
         self.dG = []
@@ -136,8 +136,8 @@ def compute_sym_corr(sigma_l, sigma_p, sigma_pl):
 class VbaUnbound(DDMClass):
     def __init__(self, config, kappa_max):
         super(VbaUnbound, self).__init__(config)
-        self.directory = os.path.join(self.dest, '07-work-unbound')
-        self.prev_store = os.path.join(self.dest, '06-vba-bound/STORE')
+        self.directory = os.path.join(self.dest, ORGANIZE['vba-unbound'])
+        self.prev_store = os.path.join(self.dest, ORGANIZE['vba-bound'], 'STORE')
 
         self.kappa = kappa_max
         self.dG = []
