@@ -40,11 +40,18 @@ Or download the `tarball`_:
 
     $ curl  -OL https://github.com/donadef/ddm/tarball/master
 
-Once you have a copy of the source, you can install it with:
+Once you have a copy of the source (it is recommanded to create a virtual environment), you can install it with:
 
 .. code-block:: console
 
+    $ pip isntall -r requirements.txt
     $ python setup.py install
+
+If you want to be able to launch calculation using only the 'ddm' command, use:
+
+.. code-block:: console
+
+    $ pip install --editable .
 
 
 .. _Github repo: https://github.com/donadef/ddm

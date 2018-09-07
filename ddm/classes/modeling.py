@@ -2,7 +2,7 @@
 import os
 import subprocess
 
-from tools import cgenff_charmm2gmx
+from ddm.tools import cgenff_charmm2gmx
 from .base import DDMClass, clean_md_files, clean_tmp, ORGANIZE
 
 

@@ -3,14 +3,14 @@ import configparser
 import os
 import numpy as np
 
-from classes.modeling import Modeling
-from classes.solvate import SolvateBound, SolvateUnbound
-from classes.reference import PickReference
-from classes.monitor import MonitorCVs
-from classes.confine import ConfineBound, ConfineUnbound
-from classes.vba import VbaBound,  VbaUnbound
-from classes.alchemical import AlchemicalBound, AlchemicalUnbound
-from classes.base import Guest, Host, Complex
+from ddm.classes.modeling import Modeling
+from ddm.classes.solvate import SolvateBound, SolvateUnbound
+from ddm.classes.reference import PickReference
+from ddm.classes.monitor import MonitorCVs
+from ddm.classes.confine import ConfineBound, ConfineUnbound
+from ddm.classes.vba import VbaBound,  VbaUnbound
+from ddm.classes.alchemical import AlchemicalBound, AlchemicalUnbound
+from ddm.classes.base import Guest, Host, Complex
 
 
 class DDM:
