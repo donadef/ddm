@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 import os
-import shutil
 import subprocess
 
 from tools import cgenff_charmm2gmx

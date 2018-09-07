@@ -2,7 +2,7 @@
 
 """Console script for ddm."""
 import click
-from ddm import DDM
+from ddm_run import DDM
 
 
 @click.command()
