@@ -18,7 +18,7 @@ from ddm.ddm_run import DDM
 @click.version_option(version='0.1.0')
 def main(config, complex):
     """Console script for ddm."""
-    click.echo(f"The program ddm should run for the complex file {complex} using the specified {config} file.")
+    click.echo(f"dG of binding calculated for the complex {complex} using the specified {config} file.")
     ddm = DDM(config, complex)
     ddm.perform_ddm()
     return 0

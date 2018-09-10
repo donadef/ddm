@@ -131,15 +131,16 @@ def compute_trapez(fluct_list, col):
 
 
 def compute_work(kappa):
+    print(kappa)
     kT = c.Boltzmann * c.N_A * 298 / 1000  # kJ/mol
 
-    # positional restrain
+    #  positional restrain
     Ztr = 1.66058  # nm^3/molecule (volume/molecule @ 1M)
-    Ztr_R = ((kappa[6] ** 2) * math.sin(kappa[7]) * ((2 * np.pi * kT) ** (3/2))) / math.sqrt(kappa[0] * kappa[1] * kappa[2])
+    Ztr_R = (kappa[6] ** 2) * math.sin(kappa[7]) * ((2 * np.pi * kT) ** 1.5) / math.sqrt(kappa[0] * kappa[1] * kappa[2])
 
     # orientation restrain
     Zrot = 8 * (np.pi ** 2)
-    Zrot_R = (math.sin(kappa[8]) * (2 * np.pi * kT)) / math.sqrt(kappa[3] * kappa[4] * kappa[5])
+    Zrot_R = math.sin(kappa[8]) * ((2 * np.pi * kT) ** 1.5) / math.sqrt(kappa[3] * kappa[4] * kappa[5])
 
     # Restraint work
     Wr = -kT * (math.log(Ztr/Ztr_R) + math.log(Zrot/Zrot_R)) / 4.184  # kcal/mol

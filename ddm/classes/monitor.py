@@ -12,7 +12,11 @@ class MonitorCVs(DDMClass):
         self.prev_store = os.path.join(self.dest, ORGANIZE['pick-reference'], 'STORE')
         self.prev_store_solv = os.path.join(self.dest, ORGANIZE['solvate-bound'], 'STORE')
         self.directory = os.path.join(self.dest, ORGANIZE['monitor-CVs'])
-        self.config = self.config['monitor-CVs']
+
+        try:
+            self.config = self.config['monitor-CVs']
+        except KeyError:
+            pass
 
         self.x0 = []
         self.kappa = []
@@ -52,7 +56,7 @@ class MonitorCVs(DDMClass):
         # Monitor POS and ORIE of ligand in unbiased MD
         if not os.path.isfile('STORE/file_max.kappa'):
             # if the over-estimated restrains are not in the config file, compute them
-            if not self.config['rr'] or not self.config['tt'] or not self.config['phi'] or not self.config['TT'] or not self.config['PHI'] or not self.config['PSI']:
+            if not self.config.get('rr', False) or not self.config.get('tt', False) or not self.config.get('phi', False) or not self.config.get('TT', False) or not self.config.get('PHI', False) or not self.config.get('PSI', False):
                 subprocess.call('plumed driver --plumed ' + os.path.join(self.prev_store, 'vba.dat') + ' --mf_xtc ' + os.path.join(self.prev_store_solv, 'prod.xtc') + ' --timestep 0.002',
                                 shell=True)
 
@@ -71,8 +75,8 @@ class MonitorCVs(DDMClass):
                 self.kappa_max = list(map(compute_kf_plus, self.kappa))
             # if the over-estimated restrains are in the config file, just save them in self.kappa_max
             else:
-                self.kappa_max = [self.config['rr'], self.config['tt'], self.config['phi'],
-                                  self.config['TT_'], self.config['PHI_'], self.config['PSI']]
+                self.kappa_max = [float(self.config['rr']), float(self.config['tt']), float(self.config['phi']),
+                                  float(self.config['TT_']), float(self.config['PHI_']), float(self.config['PSI'])]
             if not os.path.exists('STORE'):
                 os.makedirs('STORE')
             f = open('STORE/file_max.kappa', 'w')

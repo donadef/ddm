@@ -7,7 +7,8 @@ Double Decoupling Method (DDM)
         :target: https://pypi.python.org/pypi/ddm
 
 .. .. image:: https://img.shields.io/travis/donadef/ddm.svg
-        :target: https://travis-ci.org/donadef/ddm
+        :target: https://travis-ci.org/job/ddm/
+        :alt: Build status
 
 .. image:: https://readthedocs.org/projects/ddm/badge/?version=latest
         :target: https://ddm.readthedocs.io/en/latest/?badge=latest

@@ -58,7 +58,11 @@ class ConfineBound(Confine):
         self.prev_store = os.path.join(self.dest, ORGANIZE['monitor-CVs'], 'STORE')
         self.prev_store_ref = os.path.join(self.dest, ORGANIZE['pick-reference'], 'STORE')
         self.prev_store_solv = os.path.join(self.dest, ORGANIZE['solvate-bound'], 'STORE')
-        self.config = self.config['confine-bound']
+
+        try:
+            self.config = self.config['confine-bound']
+        except KeyError:
+            pass
 
         self.krms = ''
         self.krms_max = ''
