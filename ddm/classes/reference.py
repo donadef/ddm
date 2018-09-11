@@ -14,6 +14,11 @@ class PickReference(DDMClass):
         self.directory = os.path.join(self.dest, ORGANIZE['pick-reference'])
         self.static_dir = os.path.join(self.static_dir, 'pick-reference')
 
+        try:
+            self.config = self.config['monitor-CVs']
+        except KeyError:
+            self.config = self.config['main']
+
     def run(self):
         super(PickReference, self).run()
 
@@ -58,21 +63,23 @@ class PickReference(DDMClass):
             clean_md_files()
 
         if not os.path.isfile('STORE/vba.dat'):
-            if not os.path.exists('STORE'):
-                os.makedirs('STORE')
 
-            f = open(os.path.join(self.static_dir, 'vba.tmpl'), 'r')
-            filedata = f.read()
-            f.close()
+            if not self.config.get('P1', False) or not self.config.get('P2', False) or not self.config.get('P3', False) or not self.config.get('L1', False) or not self.config.get('L2', False) or not self.config.get('L3', False):
+                print("You didn't specified the anchor points in the [pick-reference] section of the config file. Check the " + self.directory + "/STORE/REFERENCE.pdb file to pick them. See the documentation to help you choose wisely.")
+                exit()
+            else:
+                f = open(os.path.join(self.static_dir, 'vba.tmpl'), 'r')
+                filedata = f.read()
+                f.close()
 
-            newdata = filedata.replace('P1', self.config['pick-reference']['P1'])
-            newdata = newdata.replace('P2', self.config['pick-reference']['P2'])
-            newdata = newdata.replace('P3', self.config['pick-reference']['P3'])
-            newdata = newdata.replace('L1', self.config['pick-reference']['L1'])
-            newdata = newdata.replace('L2', self.config['pick-reference']['L2'])
-            newdata = newdata.replace('L3', self.config['pick-reference']['L3'])
+                newdata = filedata.replace('P1', self.config['P1'])
+                newdata = newdata.replace('P2', self.config['P2'])
+                newdata = newdata.replace('P3', self.config['P3'])
+                newdata = newdata.replace('L1', self.config['L1'])
+                newdata = newdata.replace('L2', self.config['L2'])
+                newdata = newdata.replace('L3', self.config['L3'])
 
-            f = open(os.path.join(self.directory, 'STORE/vba.dat'), 'w')
-            f.write(newdata)
-            f.close()
-            check_step('STORE/vba.dat')
+                f = open(os.path.join(self.directory, 'STORE/vba.dat'), 'w')
+                f.write(newdata)
+                f.close()
+                check_step('STORE/vba.dat')

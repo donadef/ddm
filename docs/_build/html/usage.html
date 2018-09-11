@@ -35,35 +35,44 @@
             
   <div class="section" id="usage">
 <h1>Usage<a class="headerlink" href="#usage" title="Permalink to this headline">¶</a></h1>
-<p>To use Double Decoupling Method (DDM) in a project:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">ddm</span>
+<p>To use Double Decoupling Method (DDM) in a project</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">import ddm</span>
 </pre></div>
 </div>
 <p>In your terminal, use the command line</p>
-<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$</span> ddm_cli --config your_config_file --complex pdb_complex
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$</span> ddm --config your_config_file --complex pdb_complex
 </pre></div>
 </div>
 <p>Example for a configuration file:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">main</span><span class="p">]</span>
 <span class="c1"># Host code</span>
-<span class="n">host</span><span class="o">=</span><span class="n">CB7</span>
+<span class="n">host</span><span class="o">=</span>
 <span class="c1"># Guest code</span>
-<span class="n">guest</span><span class="o">=</span><span class="n">AD0</span>
-<span class="c1"># Where to write the outputs ?</span>
-<span class="n">dest</span><span class="o">=/</span><span class="n">storage</span><span class="o">/</span><span class="n">donadef</span><span class="o">/</span><span class="n">work</span><span class="o">/</span><span class="n">CB7</span><span class="o">-</span><span class="n">AD0</span>
+<span class="n">guest</span><span class="o">=</span>
+<span class="c1"># Destination</span>
+<span class="n">dest</span><span class="o">=</span>
 
 <span class="p">[</span><span class="n">pick</span><span class="o">-</span><span class="n">reference</span><span class="p">]</span>
 <span class="c1"># Anchor points</span>
-<span class="n">P1</span><span class="o">=</span><span class="mi">115</span>
-<span class="n">P2</span><span class="o">=</span><span class="mi">120</span>
-<span class="n">P3</span><span class="o">=</span><span class="mi">124</span>
-<span class="n">L1</span><span class="o">=</span><span class="mi">136</span>
-<span class="n">L2</span><span class="o">=</span><span class="mi">128</span>
-<span class="n">L3</span><span class="o">=</span><span class="mi">129</span>
+<span class="n">P1</span><span class="o">=</span>
+<span class="n">P2</span><span class="o">=</span>
+<span class="n">P3</span><span class="o">=</span>
+<span class="n">L1</span><span class="o">=</span>
+<span class="n">L2</span><span class="o">=</span>
+<span class="n">L3</span><span class="o">=</span>
 </pre></div>
 </div>
-<p>This example contains the required options. More options can be added:</p>
-<p>TODO</p>
+<p>This example contains the required parameters.</p>
+<ul class="simple">
+<li>Host code and Guest code are, respectively, the code of the protein and the code of the ligand in the pdb_complex file.</li>
+<li>Destination is the directory where outputs should be written.</li>
+<li>Anchor points are the atoms selected to monitors the movements of the ligand in respect of the receptor. See the section <a class="reference internal" href="readme.html#pick-reference"><span class="std std-ref">Pick reference</span></a> for more information on how to pick them. If you don’t specify those value, the program will stop when they are required. You can then look at the REFERENCE.pdb to pick them, add the values to your config file and relaunch the program using the same command.</li>
+</ul>
+<p>More options can be added:</p>
+<p>[main]:</p>
+<ul class="simple">
+<li>ff_parameters: Force field parameters for gromacs. Default is charmm36-jul2017.ff</li>
+</ul>
 </div>
 
 

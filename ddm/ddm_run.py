@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import time
 import configparser
 import os
 import numpy as np
@@ -52,6 +53,9 @@ class DDM:
         self.host = Host(self.host_name, self.complex, self.dest)
 
     def perform_ddm(self):
+
+        debut = time.time()
+
         # First step : prepare the host, guest and complex.
         m = Modeling(self.config, self.guest, self.host, self.complex)
         m.run()
@@ -103,3 +107,7 @@ class DDM:
         total = np.sum(all_contributions)
         print('Total: ', total)
 
+        fin = time.time()
+
+        runing_time = fin - debut
+        print("The calculation took ")

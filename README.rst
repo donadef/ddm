@@ -22,15 +22,45 @@ ddm allows binding free energy for a complex, using the double decoupling method
 * Documentation: https://ddm.readthedocs.io.
 
 
-Features
+What does ddm ?
+===============
+
+Modeling
 --------
 
-* TODO
+Solvate bound state
+-------------------
 
-.. Credits
-.. -------
+Solvate unbound state
+---------------------
 
-.. This package was created with Cookiecutter_ and the `audreyr/cookiecutter-pypackage`_ project template.
+.. _pick_reference:
 
-.. _Cookiecutter: https://github.com/audreyr/cookiecutter
-.. _`audreyr/cookiecutter-pypackage`: https://github.com/audreyr/cookiecutter-pypackage
+Pick reference
+--------------
+
+
+
+Monitor colective variables
+---------------------------
+
+Confine bound state
+-------------------
+
+Vba bound state
+---------------
+
+Alchemical bound state
+----------------------
+
+Confine unbound state
+---------------------
+
+Vba unbound state
+-----------------
+
+Alchemical unbound state
+------------------------
+
+Total
+-----

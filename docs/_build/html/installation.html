@@ -35,16 +35,6 @@
             
   <div class="section" id="installation">
 <h1>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="stable-release">
-<h2>Stable release<a class="headerlink" href="#stable-release" title="Permalink to this headline">¶</a></h2>
-<p>To install Double Decoupling Method (DDM), run this command in your terminal:</p>
-<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$</span> pip install ddm
-</pre></div>
-</div>
-<p>This is the preferred method to install Double Decoupling Method (DDM), as it will always install the most recent stable release.</p>
-<p>If you don’t have <a class="reference external" href="https://pip.pypa.io">pip</a> installed, this <a class="reference external" href="http://docs.python-guide.org/en/latest/starting/installation/">Python installation guide</a> can guide
-you through the process.</p>
-</div>
 <div class="section" id="from-sources">
 <h2>From sources<a class="headerlink" href="#from-sources" title="Permalink to this headline">¶</a></h2>
 <p>The sources for Double Decoupling Method (DDM) can be downloaded from the <a class="reference external" href="https://github.com/donadef/ddm">Github repo</a>.</p>
@@ -52,11 +42,7 @@ you through the process.</p>
 <div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$</span> git clone git://github.com/donadef/ddm
 </pre></div>
 </div>
-<p>Or download the <a class="reference external" href="https://github.com/donadef/ddm/tarball/master">tarball</a>:</p>
-<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$</span> curl  -OL https://github.com/donadef/ddm/tarball/master
-</pre></div>
-</div>
-<p>Once you have a copy of the source (it is recommanded to create a virtual environment), you can install it with:</p>
+<p>Once you have a copy of the source (it is recommanded to create a virtual environment, see <span class="target" id="handle-virtual-environmement">Handle virtual environmement</span> for more infos), you can install it with:</p>
 <div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$</span> pip isntall -r requirements.txt
 <span class="gp">$</span> python setup.py install
 </pre></div>
@@ -64,6 +50,74 @@ you through the process.</p>
 <p>If you want to be able to launch calculation using only the ‘ddm’ command, use:</p>
 <div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$</span> pip install --editable .
 </pre></div>
+</div>
+</div>
+<div class="section" id="handle-virtual-environment">
+<h2>Handle virtual environment<a class="headerlink" href="#handle-virtual-environment" title="Permalink to this headline">¶</a></h2>
+<p>To create a virtual environment for your project, use <a class="reference external" href="https://github.com/pyenv/pyenv">pyenv</a> (python version management) and <a class="reference external" href="https://github.com/pyenv/pyenv-virtualenv">virtualenv</a> (manage virtual environments).</p>
+<p>You can follow the installation instruction from the GitHub repositories. Here’s a resume if you have an Ubuntu distribution:</p>
+<div class="section" id="id1">
+<h3>pyenv:<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li>Clone the repository in a directory ~/.pyenv (as recommanded):</li>
+</ul>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$</span> git clone https://github.com/pyenv/pyenv.git ~/.pyenv
+</pre></div>
+</div>
+<ul class="simple">
+<li>Define environment variables:</li>
+</ul>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$</span> <span class="nb">echo</span> <span class="s1">&#39;export PYENV_ROOT=&quot;$HOME/.pyenv&quot;&#39;</span> &gt;&gt; ~/.bashrc
+<span class="gp">$</span> <span class="nb">echo</span> <span class="s1">&#39;export PATH=&quot;$PYENV_ROOT/bin:$PATH&quot;&#39;</span> &gt;&gt; ~/.bashrc
+</pre></div>
+</div>
+<ul class="simple">
+<li>Add pyenv init to your shell</li>
+</ul>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$</span> <span class="nb">echo</span> -e <span class="s1">&#39;if command -v pyenv 1&gt;/dev/null 2&gt;&amp;1; then\n  eval &quot;$(pyenv init -)&quot;\nfi&#39;</span> &gt;&gt; ~/.bashrc
+</pre></div>
+</div>
+<ul class="simple">
+<li>Install python versions (ddm is written in python 3)</li>
+</ul>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$</span> pyenv install <span class="m">3</span>.6.5
+</pre></div>
+</div>
+<p>If you encounter dependency problems, check pyenv’s <a class="reference external" href="https://github.com/pyenv/pyenv/wiki/common-build-problems">wiki</a>.</p>
+</div>
+<div class="section" id="id2">
+<h3>virtualenv:<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li>Clone the repository into pyenv’s plugin directory:</li>
+</ul>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$</span> git clone https://github.com/pyenv/pyenv-virtualenv.git <span class="k">$(</span>pyenv root<span class="k">)</span>/plugins/pyenv-virtualenv
+</pre></div>
+</div>
+<ul class="simple">
+<li>Create a virtual environment for ddm:</li>
+</ul>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$</span> pyenv virtualenv <span class="m">3</span>.6.5 venv_ddm
+</pre></div>
+</div>
+<ul class="simple">
+<li>Activate the virtual environment:</li>
+</ul>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$</span> pyenv activate venv_ddm
+</pre></div>
+</div>
+<p>The prompt will indicate that the environment is active.</p>
+<ul class="simple">
+<li>Deactivate the environment:</li>
+</ul>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$</span> pyenv deactivate
+</pre></div>
+</div>
+<ul class="simple">
+<li>Delete the virtual environment:</li>
+</ul>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$</span> pyenv uninstall venv_ddm
+</pre></div>
+</div>
 </div>
 </div>
 </div>
@@ -78,8 +132,12 @@ you through the process.</p>
   <h3><a href="index.html">Table Of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">Installation</a><ul>
-<li><a class="reference internal" href="#stable-release">Stable release</a></li>
 <li><a class="reference internal" href="#from-sources">From sources</a></li>
+<li><a class="reference internal" href="#handle-virtual-environment">Handle virtual environment</a><ul>
+<li><a class="reference internal" href="#id1">pyenv:</a></li>
+<li><a class="reference internal" href="#id2">virtualenv:</a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
