@@ -20,9 +20,16 @@ class DDM:
 
         self.pdb_complex = pdb_complex
 
+        try:
+            self.config['main']
+        except KeyError:
+            print("No [main] section in the config file")
+            exit()
+
         self.host_name = self.config['main']['host']
         self.guest_name = self.config['main']['guest']
         self.dest = self.config['main']['dest']
+
         if not os.path.exists(self.dest):
             os.makedirs(self.dest)
 

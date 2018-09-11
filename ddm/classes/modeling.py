@@ -12,13 +12,6 @@ class Modeling(DDMClass):
         self.directory = os.path.join(self.dest, ORGANIZE['modeling'])
         self.static_dir = os.path.join(self.static_dir, 'modeling')
 
-        try:
-            self.config = self.config['main']
-        except KeyError:
-            pass
-
-        self.ff_param = self.config.get('ff_parameters', False)
-
         self.guest = guest
         self.host = host
         self.complex = complex

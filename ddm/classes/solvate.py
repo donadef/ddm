@@ -162,6 +162,8 @@ class SolvateBound(Solvate):
             newdata = filedata.replace('XXXXX', self.host.name)
             newdata = newdata.replace('YYYYY', self.guest.name)
             newdata = newdata.replace('ZZZZZ', nb_wat)
+            if self.ff_param:
+                newdata = newdata.replace("charmm36-jul2017.ff", self.ff_param)
 
             f = open('topol-complex-solv.top', 'w')
             f.write(newdata)
@@ -228,6 +230,8 @@ class SolvateUnbound(Solvate):
 
                 newdata = filedata.replace('YYYYY', self.guest.name)
                 newdata = newdata.replace('ZZZZZ', nb_wat)
+                if self.ff_param:
+                    newdata = newdata.replace("charmm36-jul2017.ff", self.ff_param)
 
                 f = open(os.path.join(self.directory, 'topol-ligand-solv.top'), 'w')
                 f.write(newdata)

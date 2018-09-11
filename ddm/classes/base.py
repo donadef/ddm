@@ -152,6 +152,7 @@ class DDMClass:
         self.config = config
 
         self.dest = self.config['main']['dest']
+        self.ff_param = self.config.get('ff_parameters', False)
 
         self.static_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'static')
         self.awk_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'awk')
