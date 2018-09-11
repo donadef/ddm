@@ -95,7 +95,7 @@ class ConfineBound(Confine):
         # Evaluate k_unbiased by QHA and kf
         if not os.path.isfile('STORE/file_max.krms'):
             # if not in config, compute.
-            if not self.config['rms']:
+            if not self.config.get('rms', False):
                 std_c1 = compute_std(2, 'STORE/0.rms')
 
                 # Compute Kf
@@ -103,7 +103,7 @@ class ConfineBound(Confine):
                 self.krms_max = float(compute_kf_plus(self.krms))
             # if in config, store
             else:
-                self.krms_max = self.config['rms']
+                self.krms_max = float(self.config['rms'])
 
             f = open('STORE/file_max.krms', 'w')
             f.write(str(self.krms_max) + '\n')

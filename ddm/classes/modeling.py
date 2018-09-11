@@ -12,6 +12,13 @@ class Modeling(DDMClass):
         self.directory = os.path.join(self.dest, ORGANIZE['modeling'])
         self.static_dir = os.path.join(self.static_dir, 'modeling')
 
+        try:
+            self.config = self.config['main']
+        except KeyError:
+            pass
+
+        self.ff_param = self.config.get('ff_parameters', False)
+
         self.guest = guest
         self.host = host
         self.complex = complex
@@ -48,6 +55,8 @@ class Modeling(DDMClass):
                 f.close()
 
                 newdata = filedata.replace("XXXXX", self.guest.name)
+                if self.ff_param:
+                    newdata = newdata.replace("charmm36-jul2017.ff", self.ff_param)
 
                 f = open(os.path.join(self.directory, 'topol-ligand.top'), 'w')
                 f.write(newdata)
@@ -84,6 +93,8 @@ class Modeling(DDMClass):
 
                 newdata = filedata.replace('XXXXX', self.host.name)
                 newdata = newdata.replace('YYYYY', self.guest.name)
+                if self.ff_param:
+                    newdata = newdata.replace("charmm36-jul2017.ff", self.ff_param)
 
                 f = open(os.path.join(self.directory, 'topol-complex.top'), 'w')
                 f.write(newdata)
@@ -117,7 +128,10 @@ class Modeling(DDMClass):
         mol2_name = who + '.mol2'
         rtp_name = who + '.str'
         GMXDATA = os.environ['GMXDATA']
-        ffdir = os.path.join(GMXDATA, 'top/charmm36-jul2017.ff')
+        if self.ff_param:
+            ffdir = os.path.join(GMXDATA, 'top/', self.ff_param)
+        else:
+            ffdir = os.path.join(GMXDATA, 'top/charmm36-jul2017.ff')
         cgenff_charmm2gmx.main(mol_name, mol2_name, rtp_name, ffdir)
 
         # Correct file names
