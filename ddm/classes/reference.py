@@ -52,7 +52,7 @@ class PickReference(DDMClass):
                             shell=True)
             check_step('REFERENCE.pdb')
 
-            self.files_to_store.append('REFERENCE.pdb')
+            self.store_files(['REFERENCE.pdb'])
 
             clean_tmp()
             clean_md_files()
@@ -76,5 +76,3 @@ class PickReference(DDMClass):
             f.write(newdata)
             f.close()
             check_step('STORE/vba.dat')
-
-        self.store_files()

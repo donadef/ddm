@@ -76,8 +76,7 @@ class ConfineBound(Confine):
         if not os.path.isfile('STORE/' + self.guest.name + '_ref.pdb'):
             self.create_pdb_ref(os.path.join(self.prev_store_ref, 'REFERENCE.pdb'), self.guest.name + '_ref.pdb')
             check_step(self.guest.name + '_ref.pdb')
-            self.files_to_store = [self.guest.name + '_ref.pdb']
-            self.store_files()
+            self.store_files([self.guest.name + '_ref.pdb'])
 
         # Monitor CV
         if not os.path.isfile('STORE/0.rms'):
@@ -194,8 +193,7 @@ class ConfineUnbound(Confine):
         if not os.path.isfile('STORE/' + self.guest.name + '_ref.pdb'):
             self.create_pdb_ref(os.path.join(self.prev_store_ref, 'REFERENCE.pdb'), self.guest.name + '_ref.pdb', renumbering=True)
             check_step(self.guest.name + '_ref.pdb')
-            self.files_to_store = [self.guest.name + '_ref.pdb']
-            self.store_files()
+            self.store_files([self.guest.name + '_ref.pdb'])
 
         # Monitor CV
         if not os.path.isfile('STORE/0.rms'):

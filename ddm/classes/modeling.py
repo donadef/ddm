@@ -29,10 +29,10 @@ class Modeling(DDMClass):
         # Complex
         self.minimize_complex()
 
-        self.files_to_store = [self.guest.name + '.top', self.guest.name + '.prm', self.guest.name + '.itp', self.guest.name + '_ini.pdb', 'topol-ligand.top', 'ligand_mini.pdb',
-                               self.host.name + '.top', self.host.name + '.prm', self.host.name + '.itp', self.host.name + '_ini.pdb',
-                               'complex_mini.pdb', 'topol-complex.top']
-        self.store_files()
+        self.store_files([self.guest.name + '.top', self.guest.name + '.prm', self.guest.name + '.itp', self.guest.name + '_ini.pdb', 'topol-ligand.top', 'ligand_mini.pdb',
+                          self.host.name + '.top', self.host.name + '.prm', self.host.name + '.itp', self.host.name + '_ini.pdb',
+                          'complex_mini.pdb', 'topol-complex.top'])
+
 
     def prepare_guest(self):
         # PDB param file for the guest

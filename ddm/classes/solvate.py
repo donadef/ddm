@@ -169,16 +169,15 @@ class SolvateBound(Solvate):
             f.write(newdata)
             f.close()
 
-            self.files_to_store.append('topol-complex-solv.top')
-            self.store_files()
+            self.store_files(['topol-complex-solv.top'])
+
         elif not os.path.isfile('topol-complex-solv.top') and os.path.isfile('STORE/topol-complex-solv.top'):
             shutil.copy('STORE/topol-complex-solv.top', self.directory)
 
         # Ionize
         if not os.path.isfile('complex-cubic-box-solv-ions.pdb') and not os.path.isfile('STORE/complex-cubic-box-solv-ions.pdb'):
             self.ionize('complex')
-            self.files_to_store.append('complex-cubic-box-solv-ions.pdb')
-            self.store_files()
+            self.store_files(['complex-cubic-box-solv-ions.pdb'])
 
         # Run dynamics
         if not os.path.isfile('STORE/prod.gro') or not os.path.isfile('STORE/prod.tpr'):
@@ -187,12 +186,7 @@ class SolvateBound(Solvate):
             check_step('prod.xtc')
             check_step('prod.cpt')
             check_step('prod.gro')
-            self.files_to_store.append('prod.tpr')
-            self.files_to_store.append('prod.xtc')
-            self.files_to_store.append('prod.cpt')
-            self.files_to_store.append('prod.gro')
-
-        self.store_files()
+            self.store_files(['prod.tpr', 'prod.xtc', 'prod.cpt', 'prod.gro'])
 
         clean_md_files()
 
@@ -236,14 +230,14 @@ class SolvateUnbound(Solvate):
                 f = open(os.path.join(self.directory, 'topol-ligand-solv.top'), 'w')
                 f.write(newdata)
                 f.close()
-                self.files_to_store.append('topol-ligand-solv.top')
+                self.store_files(['topol-ligand-solv.top'])
         elif not os.path.isfile('topol-ligand-solv.top') and os.path.isfile('STORE/topol-ligand-solv.top'):
             shutil.copy('STORE/topol-ligand-solv.top', self.directory)
 
         # Ionize
         if not os.path.isfile('ligand-cubic-box-solv-ions.pdb') and not os.path.isfile('STORE/ligand-cubic-box-solv-ions.pdb'):
             self.ionize('ligand')
-            self.files_to_store.append('ligand-cubic-box-solv-ions.pdb')
+            self.store_files(['ligand-cubic-box-solv-ions.pdb'])
 
         # Run dynamics
         if not os.path.isfile('STORE/prod.gro') or not os.path.isfile('STORE/prod.tpr'):
@@ -252,11 +246,6 @@ class SolvateUnbound(Solvate):
             check_step('prod.xtc')
             check_step('prod.cpt')
             check_step('prod.gro')
-            self.files_to_store.append('prod.tpr')
-            self.files_to_store.append('prod.xtc')
-            self.files_to_store.append('prod.cpt')
-            self.files_to_store.append('prod.gro')
-
-        self.store_files()
+            self.store_files(['prod.tpr', 'prod.xtc', 'prod.cpt', 'prod.gro'])
 
         clean_md_files()

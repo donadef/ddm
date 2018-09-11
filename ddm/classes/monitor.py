@@ -54,16 +54,15 @@ class MonitorCVs(DDMClass):
 
 
         # Monitor POS and ORIE of ligand in unbiased MD
-        if not os.path.isfile('STORE/file_max.kappa'):
+        if not os.path.isfile('STORE/file_max.kappa') or not os.path.isfile('STORE/COLVAR-rest'):
+            subprocess.call('plumed driver --plumed ' + os.path.join(self.prev_store, 'vba.dat') + ' --mf_xtc ' + os.path.join(self.prev_store_solv, 'prod.xtc') + ' --timestep 0.002',
+                            shell=True)
+
+            check_step('COLVAR-rest')
+            self.store_files(['COLVAR-rest'])
+
             # if the over-estimated restrains are not in the config file, compute them
             if not self.config.get('rr', False) or not self.config.get('tt', False) or not self.config.get('phi', False) or not self.config.get('TT', False) or not self.config.get('PHI', False) or not self.config.get('PSI', False):
-                subprocess.call('plumed driver --plumed ' + os.path.join(self.prev_store, 'vba.dat') + ' --mf_xtc ' + os.path.join(self.prev_store_solv, 'prod.xtc') + ' --timestep 0.002',
-                                shell=True)
-
-                check_step('COLVAR-rest')
-                self.files_to_store = ['COLVAR-rest']
-                self.store_files()
-
                 std_cvs = []
                 for col in range(2, 8):
                     std_cvs.append(compute_std(col, 'COLVAR-rest'))
@@ -71,7 +70,7 @@ class MonitorCVs(DDMClass):
                 # Compute Kfs
                 self.kappa = list(map(compute_kf, std_cvs))
 
-                os.remove('COLVAR-rest')
+                # os.remove('COLVAR-rest')
                 self.kappa_max = list(map(compute_kf_plus, self.kappa))
             # if the over-estimated restrains are in the config file, just save them in self.kappa_max
             else:

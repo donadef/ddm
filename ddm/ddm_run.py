@@ -22,13 +22,27 @@ class DDM:
 
         try:
             self.config['main']
-        except KeyError:
+        except configparser.NoSectionError:
             print("No [main] section in the config file")
             exit()
 
-        self.host_name = self.config['main']['host']
-        self.guest_name = self.config['main']['guest']
-        self.dest = self.config['main']['dest']
+        try:
+            self.host_name = self.config['main']['host']
+        except KeyError:
+            print("host parameter in [main] section of the config file is required.")
+            exit()
+
+        try:
+            self.guest_name = self.config['main']['guest']
+        except KeyError:
+            print("guest parameter in [main] section of the config file is required.")
+            exit()
+
+        try:
+            self.dest = self.config['main']['dest']
+        except KeyError:
+            print("dest parameter in [main] section of the config file is required.")
+            exit()
 
         if not os.path.exists(self.dest):
             os.makedirs(self.dest)

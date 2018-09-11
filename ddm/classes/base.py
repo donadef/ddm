@@ -152,14 +152,12 @@ class DDMClass:
         self.config = config
 
         self.dest = self.config['main']['dest']
-        self.ff_param = self.config.get('ff_parameters', False)
+        self.ff_param = self.config['main'].get('ff_parameters', False)
 
         self.static_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'static')
         self.awk_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'awk')
 
         self.directory = self.dest
-
-        self.files_to_store = []
 
     def run(self):
         if not os.path.exists(self.directory):
@@ -167,12 +165,12 @@ class DDMClass:
 
         os.chdir(self.directory)
 
-    def store_files(self):
+    def store_files(self, files):
         store_dir = os.path.join(self.directory, 'STORE')
         if not os.path.exists(store_dir):
             os.makedirs(store_dir)
 
-        for file in self.files_to_store:
+        for file in files:
             try:
                 shutil.copy(file, store_dir)
             except FileNotFoundError:

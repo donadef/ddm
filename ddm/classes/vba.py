@@ -96,7 +96,7 @@ class VbaBound(Bound):
                 fluct = str(ll)
                 if ll == 0:
                     cols = [2, 3, 4, 5, 6, 7]
-                    file = '../04-monitor-CVs/STORE/COLVAR-rest'
+                    file = '../monitor-CVs/STORE/COLVAR-rest'
                 else:
                     cols = [2, 4, 6, 8, 10, 12]
                     file = 'STORE/' + str(ll) + '.vba'
