@@ -127,8 +127,8 @@ class VbaBound(Bound):
         return self.dG
 
 
-def compute_sym_corr(sigma_l, sigma_p, sigma_pl):
-    kT = c.Boltzmann * c.N_A * 298 / 1000  # kJ/mol
+def compute_sym_corr(sigma_l, sigma_p, sigma_pl, temp):
+    kT = c.Boltzmann * c.N_A * temp / 1000  # kJ/mol
 
     return -kT * math.log(sigma_pl / (sigma_l * sigma_p)) / 4.184  # kcal/mol
 
@@ -153,7 +153,7 @@ class VbaUnbound(DDMClass):
             for col in [2, 4, 8]:
                 self.kappa.append(compute_mean(col, os.path.join(self.prev_store, '1.0.vba')))
 
-            self.dG.append(compute_work(self.kappa))
+            self.dG.append(compute_work(self.kappa, self.temp))
             f = open('STORE/VBA_UB.dG', 'w')
             f.writelines(list(map(lambda x: str(x) + '\n', self.dG)))
             f.close()
@@ -164,7 +164,7 @@ class VbaUnbound(DDMClass):
                     self.dG.append(float(line.rstrip('\n')))
 
         if not os.path.isfile('STORE/sym_corr.dat'):
-            self.sym_corr.append(compute_sym_corr(1, 14, 1))
+            self.sym_corr.append(compute_sym_corr(1, 14, 1, self.temp))
             f = open('STORE/sym_corr.dat', 'w')
             f.writelines(list(map(lambda x: str(x) + '\n', self.sym_corr)))
             f.close()

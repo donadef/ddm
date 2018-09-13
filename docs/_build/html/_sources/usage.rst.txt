@@ -38,11 +38,14 @@ This example contains the required parameters.
 
 - Host code and Guest code are, respectively, the code of the protein and the code of the ligand in the pdb_complex file.
 - Destination is the directory where outputs should be written.
-- Anchor points are the atoms selected to monitors the movements of the ligand in respect of the receptor. See the section :ref:`pick_reference` for more information on how to pick them. If you don't specify those value, the program will stop when they are required. You can then look at the REFERENCE.pdb to pick them, add the values to your config file and relaunch the program using the same command.
+- Anchor points are the atoms selected to monitors the movements of the ligand in respect of the receptor. See the section :ref:`pick_reference` for more information on how to pick them.
+
+  If you don't specify those value, the program will stop when they are required. You can then look at the REFERENCE.pdb to pick them, add the values to your config file and relaunch the program using the same command.
 
 
 More options can be added:
 
 [main]:
 
-* ff_parameters: Force field parameters for gromacs. Default is charmm36-jul2017.ff
+- ff_parameters: Force field parameters for gromacs. Default is 'charmm36-jul2017.ff'.
+- temperature: Set the temperature for the experiment. Default is '???'.

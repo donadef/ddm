@@ -12,7 +12,7 @@ from ddm.ddm_run import DDM
               type=click.Path(exists=True, allow_dash=True),
               required=True)
 @click.option('--complex',
-              help='The pbd file of the complex you want to study.',
+              help='The PDB file of the complex you want to study.',
               type=click.Path(exists=True, allow_dash=True),
               required=True)
 @click.version_option(version='0.1.0')

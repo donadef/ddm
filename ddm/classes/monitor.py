@@ -68,7 +68,7 @@ class MonitorCVs(DDMClass):
                     std_cvs.append(compute_std(col, 'COLVAR-rest'))
 
                 # Compute Kfs
-                self.kappa = list(map(compute_kf, std_cvs))
+                self.kappa = list(map(lambda x: compute_kf(x, self.temp), std_cvs))
 
                 # os.remove('COLVAR-rest')
                 self.kappa_max = list(map(compute_kf_plus, self.kappa))

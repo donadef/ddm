@@ -63,15 +63,20 @@
 </pre></div>
 </div>
 <p>This example contains the required parameters.</p>
-<ul class="simple">
-<li>Host code and Guest code are, respectively, the code of the protein and the code of the ligand in the pdb_complex file.</li>
-<li>Destination is the directory where outputs should be written.</li>
-<li>Anchor points are the atoms selected to monitors the movements of the ligand in respect of the receptor. See the section <a class="reference internal" href="readme.html#pick-reference"><span class="std std-ref">Pick reference</span></a> for more information on how to pick them. If you don’t specify those value, the program will stop when they are required. You can then look at the REFERENCE.pdb to pick them, add the values to your config file and relaunch the program using the same command.</li>
+<ul>
+<li><p class="first">Host code and Guest code are, respectively, the code of the protein and the code of the ligand in the pdb_complex file.</p>
+</li>
+<li><p class="first">Destination is the directory where outputs should be written.</p>
+</li>
+<li><p class="first">Anchor points are the atoms selected to monitors the movements of the ligand in respect of the receptor. See the section <a class="reference internal" href="readme.html#pick-reference"><span class="std std-ref">Pick reference</span></a> for more information on how to pick them.</p>
+<p>If you don’t specify those value, the program will stop when they are required. You can then look at the REFERENCE.pdb to pick them, add the values to your config file and relaunch the program using the same command.</p>
+</li>
 </ul>
 <p>More options can be added:</p>
 <p>[main]:</p>
 <ul class="simple">
-<li>ff_parameters: Force field parameters for gromacs. Default is charmm36-jul2017.ff</li>
+<li>ff_parameters: Force field parameters for gromacs. Default is ‘charmm36-jul2017.ff’.</li>
+<li>temperature: Set the temperature for the experiment. Default is ‘???’.</li>
 </ul>
 </div>
 

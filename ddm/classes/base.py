@@ -55,7 +55,7 @@ def clean_tmp():
         os.remove('TMP')
 
 
-def compute_mean(col,file):
+def compute_mean(col, file):
     lcol = []
     with open(file, 'r') as file:
         for line in file:
@@ -81,8 +81,8 @@ def compute_std(col, file):
     return float(std)
 
 
-def compute_kf(std):
-    return (8.314 * 300 / 1000) / std ** 2
+def compute_kf(std, temp):
+    return (8.314 * temp / 1000) / std ** 2
 
 
 def compute_kf_plus(kf):
@@ -103,7 +103,7 @@ def compute_fluct(x0, kf, col, file, dihe=False):
         for line in f:
             if not line.startswith('#'):
                 c = line.lstrip(' ').rstrip('\n').split(' ')[col - 1]
-                delta = float(c) - x0
+                delta = float(c) - float(x0)
                 if dihe:
                     absd = abs(delta)
                     if absd > np.pi:
@@ -130,9 +130,9 @@ def compute_trapez(fluct_list, col):
     return sum / 4.184
 
 
-def compute_work(kappa):
+def compute_work(kappa, temp):
     print(kappa)
-    kT = c.Boltzmann * c.N_A * 298 / 1000  # kJ/mol
+    kT = c.Boltzmann * c.N_A * temp / 1000  # kJ/mol
 
     #  positional restrain
     Ztr = 1.66058  # nm^3/molecule (volume/molecule @ 1M)
@@ -153,6 +153,7 @@ class DDMClass:
 
         self.dest = self.config['main']['dest']
         self.ff_param = self.config['main'].get('ff_parameters', False)
+        self.temp = float(self.config['main'].get('temperature', '300'))
 
         self.static_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'static')
         self.awk_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'awk')

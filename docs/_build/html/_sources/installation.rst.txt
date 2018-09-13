@@ -20,7 +20,7 @@ Once you have a copy of the source (it is recommanded to create a virtual enviro
 
 .. code-block:: console
 
-    $ pip isntall -r requirements.txt
+    $ pip install -r requirements.txt
     $ python setup.py install
 
 If you want to be able to launch calculation using only the 'ddm' command, use:

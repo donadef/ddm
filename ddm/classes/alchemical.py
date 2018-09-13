@@ -77,10 +77,10 @@ class AlchemicalBound(Bound):
 
         if not os.path.isfile('STORE/ALCH_BND.dG'):
             xvg_list = ['dhdl-files/production-lambda_' + ll + '.xvg' for ll in ll_list]
-            u_nk = pd.concat([extract_u_nk(xvg, T=300) for xvg in xvg_list])
+            u_nk = pd.concat([extract_u_nk(xvg, T=self.temp) for xvg in xvg_list])
             mbar = MBAR().fit(u_nk)
 
-            self.dG.append(mbar.delta_f_.iloc[0, len(xvg_list) - 1] * c.Boltzmann * c.N_A / (4.184 * 1000) * 300)
+            self.dG.append(mbar.delta_f_.iloc[0, len(xvg_list) - 1] * c.Boltzmann * c.N_A / (4.184 * 1000) * self.temp)
 
             f = open('STORE/ALCH_BND.dG', 'w')
             f.writelines(list(map(lambda x: str(x) + '\n', self.dG)))
@@ -142,10 +142,10 @@ class AlchemicalUnbound(DDMClass):
 
         if not os.path.isfile('STORE/ALCH_UB.dG'):
             xvg_list = ['dhdl-files/production-lambda_' + ll + '.xvg' for ll in ll_list]
-            u_nk = pd.concat([extract_u_nk(xvg, T=300) for xvg in xvg_list])
+            u_nk = pd.concat([extract_u_nk(xvg, T=self.temp) for xvg in xvg_list])
             mbar = MBAR().fit(u_nk)
 
-            self.dG.append(mbar.delta_f_.iloc[0, len(xvg_list) - 1] * c.Boltzmann * c.N_A / (4.184 * 1000) * 300)
+            self.dG.append(mbar.delta_f_.iloc[0, len(xvg_list) - 1] * c.Boltzmann * c.N_A / (4.184 * 1000) * self.temp)
 
             f = open('STORE/ALCH_UB.dG', 'w')
             f.writelines(list(map(lambda x: str(x) + '\n', self.dG)))

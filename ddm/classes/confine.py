@@ -98,7 +98,7 @@ class ConfineBound(Confine):
                 std_c1 = compute_std(2, 'STORE/0.rms')
 
                 # Compute Kf
-                self.krms = compute_kf(std_c1)
+                self.krms = compute_kf(std_c1, self.temp)
                 self.krms_max = float(compute_kf_plus(self.krms))
             # if in config, store
             else:

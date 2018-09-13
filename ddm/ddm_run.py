@@ -54,8 +54,6 @@ class DDM:
 
     def perform_ddm(self):
 
-        debut = time.time()
-
         # First step : prepare the host, guest and complex.
         m = Modeling(self.config, self.guest, self.host, self.complex)
         m.run()
@@ -106,8 +104,3 @@ class DDM:
         all_contributions = dG_CONF_BND + dG_VBA_BND + dG_ALCH_BND + list(map(lambda x: -x, dG_CONF_UB)) + dG_VBA_UB + sym_corr + list(map(lambda x: -x, dG_ALCH_UD))
         total = np.sum(all_contributions)
         print('Total: ', total)
-
-        fin = time.time()
-
-        runing_time = fin - debut
-        print("The calculation took ")
