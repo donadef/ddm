@@ -55,7 +55,7 @@ class VbaBound(Bound):
             self.config = self.config['main']
 
         self.ll_list = list(map(lambda x: float(x), self.config.get('windows', '0.001, 0.01, 0.1, 0.2, 0.5, 1.0').split(', ')))
-        self.method = self.config.get('int_meth', 'TI')
+        self.int_meth = self.config.get('int_meth', 'TI')
         self.flucts = []
         self.dG = []
 
@@ -101,33 +101,38 @@ class VbaBound(Bound):
             os.remove('plumed.dat')
         clean_md_files()
 
-        if not os.path.isfile('STORE/POS-ORIE.dhdl'):
+        if self.int_meth == 'TI':
+            if not os.path.isfile('STORE/POS-ORIE.dhdl'):
+                for ll in [0] + self.ll_list:
+                    fluct = str(ll)
+                    if ll == 0:
+                        cols = [2, 3, 4, 5, 6, 7]
+                        file = '../monitor-CVs/STORE/COLVAR-rest'
+                    else:
+                        cols = [2, 4, 6, 8, 10, 12]
+                        file = 'STORE/' + str(ll) + '.vba'
+                    for col in range(6):
+                        fluct += ' ' + str(compute_fluct(self.x0[col], self.kappa_max[col], cols[col], file, dihe=self.dihe[col]))
+                    self.flucts.append(fluct)
+                f = open('STORE/POS-ORIE.dhdl', 'w')
+                f.writelines(list(map(lambda x: str(x) + '\n', self.flucts)))
+                f.close()
+
+            if not self.flucts:
+                with open('STORE/POS-ORIE.dhdl', 'r') as file:
+                    for line in file:
+                        self.flucts.append(line.rstrip('\n'))
+
+            if not os.path.isfile('STORE/VBA_BND.dG'):
+                for i in range(2, 8):
+                    self.dG.append(compute_trapez(self.flucts, i))
+                f = open('STORE/VBA_BND.dG', 'w')
+                f.writelines(list(map(lambda x: str(x) + '\n', self.dG)))
+                f.close()
+
+        if self.int_meth == 'WHAM':
             for ll in [0] + self.ll_list:
-                fluct = str(ll)
-                if ll == 0:
-                    cols = [2, 3, 4, 5, 6, 7]
-                    file = '../monitor-CVs/STORE/COLVAR-rest'
-                else:
-                    cols = [2, 4, 6, 8, 10, 12]
-                    file = 'STORE/' + str(ll) + '.vba'
-                for col in range(6):
-                    fluct += ' ' + str(compute_fluct(self.x0[col], self.kappa_max[col], cols[col], file, dihe=self.dihe[col]))
-                self.flucts.append(fluct)
-            f = open('STORE/POS-ORIE.dhdl', 'w')
-            f.writelines(list(map(lambda x: str(x) + '\n', self.flucts)))
-            f.close()
-
-        if not self.flucts:
-            with open('STORE/POS-ORIE.dhdl', 'r') as file:
-                for line in file:
-                    self.flucts.append(line.rstrip('\n'))
-
-        if not os.path.isfile('STORE/VBA_BND.dG'):
-            for i in range(2, 8):
-                self.dG.append(compute_trapez(self.flucts, i))
-            f = open('STORE/VBA_BND.dG', 'w')
-            f.writelines(list(map(lambda x: str(x) + '\n', self.dG)))
-            f.close()
+                pass
 
         if not self.dG:
             with open('STORE/VBA_BND.dG', 'r') as file:
