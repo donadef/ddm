@@ -19,7 +19,7 @@ ddm allows binding free energy for a complex, using the double decoupling method
 
 
 * Free software: MIT license
-* Documentation: https://ddm.readthedocs.io.
+* Documentation and installation instructions: https://ddm.readthedocs.io.
 
 
 What does ddm ?

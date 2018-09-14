@@ -12,6 +12,7 @@ class Confine(DDMClass):
         super(Confine, self).__init__(config)
 
         self.guest = guest
+        self.ll_list = [0.001, 0.01, 0.1, 0.2, 0.5, 1.0]
 
     def create_pdb_ref(self, input_file, output_file, renumbering=False):
         f = open(input_file, 'r')
@@ -122,7 +123,7 @@ class ConfineBound(Confine):
 
             nn = 1
             prev = os.path.join(self.prev_store_solv, 'prod')
-            for ll in [0.001, 0.01, 0.1, 0.2, 0.5, 1.0]:
+            for ll in self.ll_list :
                 if not os.path.isfile('STORE/' + str(ll) + '.rms'):
                     kk = self.krms_max * ll
 
@@ -149,7 +150,7 @@ class ConfineBound(Confine):
             clean_md_files()
 
         if not os.path.isfile('STORE/RMS'):
-            for ll in [0, 0.001, 0.01, 0.1, 0.2, 0.5, 1.0]:
+            for ll in [0] + self.ll_list:
                 self.flucts.append(str(ll) + ' ' + str(compute_fluct(0.0, self.krms_max, 2, "STORE/" + str(ll) + '.rms')))
             f = open('STORE/RMS', 'w')
             f.writelines(list(map(lambda x: str(x) + '\n', self.flucts)))
@@ -217,7 +218,7 @@ class ConfineUnbound(Confine):
 
             nn = 1
             prev = os.path.join(self.prev_store_solv, 'prod')
-            for ll in [0.001, 0.01, 0.1, 0.2, 0.5, 1.0]:
+            for ll in self.ll_list:
                 if not os.path.isfile('STORE/' + str(ll) + '.rms'):
                     kk = self.krms_max * ll
 
@@ -244,7 +245,7 @@ class ConfineUnbound(Confine):
             clean_md_files()
 
         if not os.path.isfile('STORE/RMS'):
-            for ll in [0, 0.001, 0.01, 0.1, 0.2, 0.5, 1.0]:
+            for ll in [0] + self.ll_list:
                 self.flucts.append(str(ll) + ' ' + str(compute_fluct(0.0, self.krms_max, 2, "STORE/" + str(ll) + '.rms')))
             f = open('STORE/RMS', 'w')
             f.writelines(list(map(lambda x: str(x) + '\n', self.flucts)))

@@ -46,6 +46,9 @@ class VbaBound(Bound):
         self.prev_store = os.path.join(self.dest, ORGANIZE['confine-bound'], 'STORE')
         self.prev_store_solv = os.path.join(self.dest, ORGANIZE['solvate-bound'], 'STORE')
 
+        # self.ll_list = [0.001, 0.01, 0.1, 0.2, 0.5, 1.0]
+        self.ll_list = [0.001, 0.002, 0.005, 0.01, 0.02, 0.05, 0.1, 0.2, 0.5, 1.0]
+
         self.flucts = []
         self.dG = []
 
@@ -63,7 +66,7 @@ class VbaBound(Bound):
 
             nn = 1
             prev = os.path.join(self.prev_store, '6')
-            for ll in [0.001, 0.01, 0.1, 0.2, 0.5, 1.0]:
+            for ll in self.ll_list:
                 if not os.path.isfile('STORE/' + str(ll) + '.vba'):
 
                     newdata = filedata.replace('KK1', str(self.kappa_max[0] * ll))
@@ -92,7 +95,7 @@ class VbaBound(Bound):
         clean_md_files()
 
         if not os.path.isfile('STORE/POS-ORIE.dhdl'):
-            for ll in [0, 0.001, 0.01, 0.1, 0.2, 0.5, 1.0]:
+            for ll in [0] + self.ll_list:
                 fluct = str(ll)
                 if ll == 0:
                     cols = [2, 3, 4, 5, 6, 7]
