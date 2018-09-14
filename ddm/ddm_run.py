@@ -2,6 +2,7 @@
 import time
 import configparser
 import os
+import shutil
 import numpy as np
 
 from ddm.classes.modeling import Modeling
@@ -47,6 +48,10 @@ class DDM:
 
         if not os.path.exists(self.dest):
             os.makedirs(self.dest)
+
+        # Copy the config file in the folder to keep track of the chosen settings.
+        if not os.path.isfile(os.path.join(self.dest, config_file)):
+            shutil.copy(config_file, self.dest)
 
         self.complex = Complex(self.pdb_complex, self.dest)
         self.guest = Guest(self.guest_name, self.complex, self.dest)

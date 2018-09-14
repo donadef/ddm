@@ -55,6 +55,7 @@ class VbaBound(Bound):
             self.config = self.config['main']
 
         self.ll_list = list(map(lambda x: float(x), self.config.get('windows', '0.001, 0.01, 0.1, 0.2, 0.5, 1.0').split(', ')))
+        self.method = self.config.get('int_meth', 'TI')
         self.flucts = []
         self.dG = []
 
