@@ -47,5 +47,9 @@ More options can be added:
 
 [main]:
 
-- ff_parameters: Force field parameters for gromacs. Default is 'charmm36-jul2017.ff'.
-- temperature: Set the temperature for the experiment. Default is '???'.
+- ff_parameters: Force field parameters for gromacs. Default is charmm36-jul2017.ff.
+- temperature: Set the temperature for the experiment. Default is ???.
+
+[vba-bound]:
+
+- windows: Factors to apply on constrain consecutively for dG vba-bound calculation. Default is 0.001, 0.01, 0.1, 0.2, 0.5, 1.0.

@@ -131,7 +131,6 @@ def compute_trapez(fluct_list, col):
 
 
 def compute_work(kappa, temp):
-    print(kappa)
     kT = c.Boltzmann * c.N_A * temp / 1000  # kJ/mol
 
     #  positional restrain

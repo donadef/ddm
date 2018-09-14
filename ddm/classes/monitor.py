@@ -16,7 +16,7 @@ class MonitorCVs(DDMClass):
         try:
             self.config = self.config['monitor-CVs']
         except KeyError:
-            pass
+            self.config = self.config['main']
 
         self.x0 = []
         self.kappa = []

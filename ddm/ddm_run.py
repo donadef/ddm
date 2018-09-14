@@ -23,7 +23,7 @@ class DDM:
 
         try:
             self.config['main']
-        except configparser.NoSectionError:
+        except KeyError:
             print("No [main] section in the config file")
             exit()
 

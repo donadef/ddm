@@ -11,9 +11,6 @@ from .base import DDMClass, check_step, clean_md_files, ORGANIZE
 from .vba import Bound
 
 
-ll_list = ['00', '01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23']
-
-
 class AlchemicalBound(Bound):
     def __init__(self, config, guest, x0, kappa_max, krms_max):
         super(AlchemicalBound, self).__init__(config, guest, x0, kappa_max, krms_max)
@@ -22,6 +19,9 @@ class AlchemicalBound(Bound):
         self.prev_store = os.path.join(self.dest, ORGANIZE['vba-bound'], 'STORE')
         self.prev_store_6 = os.path.join(self.dest, ORGANIZE['confine-bound'], 'STORE')
         self.prev_store_solv = os.path.join(self.dest, ORGANIZE['solvate-bound'], 'STORE')
+
+        self.ll_list = ['00', '01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12', '13', '14', '15',
+                        '16', '17', '18', '19', '20', '21', '22', '23']
 
         self.dG = []
 
@@ -45,7 +45,7 @@ class AlchemicalBound(Bound):
             f.close()
             prodfile_data = prodfile_data.replace('XXXXX', self.guest.name)
 
-            for ll in ll_list:
+            for ll in self.ll_list:
                 if not os.path.isfile('dhdl-files/production-lambda_' + ll + '.xvg'):
 
                     new_plumedfile_data = plumedfile_data.replace('KK1', str(self.kappa_max[0]))
@@ -76,7 +76,7 @@ class AlchemicalBound(Bound):
             os.remove('plumed.dat')
 
         if not os.path.isfile('STORE/ALCH_BND.dG'):
-            xvg_list = ['dhdl-files/production-lambda_' + ll + '.xvg' for ll in ll_list]
+            xvg_list = ['dhdl-files/production-lambda_' + ll + '.xvg' for ll in self.ll_list]
             u_nk = pd.concat([extract_u_nk(xvg, T=self.temp) for xvg in xvg_list])
             mbar = MBAR().fit(u_nk)
 
@@ -103,6 +103,9 @@ class AlchemicalUnbound(DDMClass):
 
         self.guest = guest
 
+        self.ll_list = ['00', '01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12', '13', '14', '15',
+                        '16', '17', '18', '19', '20', '21', '22', '23']
+
         self.dG = []
 
     def run(self):
@@ -123,7 +126,7 @@ class AlchemicalUnbound(DDMClass):
             f.close()
             prodfile_data = prodfile_data.replace('XXXXX', self.guest.name)
 
-            for ll in ll_list:
+            for ll in self.ll_list:
                 if not os.path.isfile('dhdl-files/production-lambda_' + ll + '.xvg'):
                     new_prodfile_data = prodfile_data.replace('YYYYY', str(int(ll)))
 
@@ -141,7 +144,7 @@ class AlchemicalUnbound(DDMClass):
                     clean_md_files()
 
         if not os.path.isfile('STORE/ALCH_UB.dG'):
-            xvg_list = ['dhdl-files/production-lambda_' + ll + '.xvg' for ll in ll_list]
+            xvg_list = ['dhdl-files/production-lambda_' + ll + '.xvg' for ll in self.ll_list]
             u_nk = pd.concat([extract_u_nk(xvg, T=self.temp) for xvg in xvg_list])
             mbar = MBAR().fit(u_nk)
 

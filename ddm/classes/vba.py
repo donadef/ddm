@@ -2,6 +2,7 @@
 import os
 import shutil
 import subprocess
+import configparser
 from scipy import constants as c
 import math
 
@@ -46,9 +47,14 @@ class VbaBound(Bound):
         self.prev_store = os.path.join(self.dest, ORGANIZE['confine-bound'], 'STORE')
         self.prev_store_solv = os.path.join(self.dest, ORGANIZE['solvate-bound'], 'STORE')
 
-        # self.ll_list = [0.001, 0.01, 0.1, 0.2, 0.5, 1.0]
-        self.ll_list = [0.001, 0.002, 0.005, 0.01, 0.02, 0.05, 0.1, 0.2, 0.5, 1.0]
+        # [0.001, 0.01, 0.1, 0.2, 0.5, 1.0]
+        # [0.001, 0.002, 0.005, 0.01, 0.02, 0.05, 0.1, 0.2, 0.5, 1.0]
+        try:
+            self.config = self.config['vba-bound']
+        except KeyError:
+            self.config = self.config['main']
 
+        self.ll_list = list(map(lambda x: float(x), self.config.get('windows', '0.001, 0.01, 0.1, 0.2, 0.5, 1.0').split(', ')))
         self.flucts = []
         self.dG = []
 
