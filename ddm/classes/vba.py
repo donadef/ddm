@@ -59,6 +59,23 @@ class VbaBound(Bound):
         self.flucts = []
         self.dG = []
 
+    def wham_write_timeseries(self, name, fluct):
+        for i in range(len(self.ll_list)):
+            file_name = 'timeseries-' + name + '-' + str(self.ll_list[i])
+            f = open(os.path.join('WHAM', file_name), 'w')
+            f.writelines(list(map(lambda x: str(x) + '\n', fluct[i])))
+            f.close()
+
+    def wham_write_metadatafile(self, name):
+        lines = []
+        for i in range(len(self.ll_list)):
+            lines.append('timeseries-' + name + '-' + str(self.ll_list[i]) + ' ' + str(self.x0[i]) + ' ' + str(float(self.kappa_max[i])*self.ll_list[i]))
+
+        file_name = 'metadatafile-' + name
+        f = open(os.path.join('WHAM', file_name), 'w')
+        f.writelines(list(map(lambda x: str(x) + '\n', lines)))
+        f.close()
+
     def run(self):
         super(VbaBound, self).run()
 
@@ -131,8 +148,57 @@ class VbaBound(Bound):
                 f.close()
 
         if self.int_meth == 'WHAM':
+            if not os.path.isdir("WHAM"):
+                os.makedirs("WHAM")
+            r_fluct = []
+            tt_fluct = []
+            phi_fluct = []
+            TT_fluct = []
+            PHI_fluct = []
+            PSI_fluct = []
             for ll in [0] + self.ll_list:
-                pass
+                r_windows_fluct = []
+                tt_windows_fluct = []
+                phi_windows_fluct = []
+                TT_windows_fluct = []
+                PHI_windows_fluct = []
+                PSI_windows_fluct = []
+                if ll == 0:
+                    file = '../monitor-CVs/STORE/COLVAR-rest'
+                    with open(file, 'r') as f:
+                        for line in f:
+                            if not line.startswith('#'):
+                                c = line.lstrip(' ').rstrip('\n').split(' ')
+                                r_windows_fluct.append(float(c[1]))
+                                tt_windows_fluct.append(float(c[2]))
+                                phi_windows_fluct.append(float(c[3]))
+                                TT_windows_fluct.append(float(c[4]))
+                                PHI_windows_fluct.append(float(c[5]))
+                                PSI_windows_fluct.append(float(c[6]))
+                else:
+                    file = 'STORE/' + str(ll) + '.vba'
+                    with open(file, 'r') as f:
+                        for line in f:
+                            if not line.startswith('#'):
+                                c = line.lstrip(' ').rstrip('\n').split(' ')
+                                r_windows_fluct.append(float(c[1]))
+                                tt_windows_fluct.append(float(c[3]))
+                                phi_windows_fluct.append(float(c[5]))
+                                TT_windows_fluct.append(float(c[7]))
+                                PHI_windows_fluct.append(float(c[9]))
+                                PSI_windows_fluct.append(float(c[11]))
+                r_fluct.append(r_windows_fluct)
+                tt_fluct.append(tt_windows_fluct)
+                phi_fluct.append(phi_windows_fluct)
+                TT_fluct.append(TT_windows_fluct)
+                PHI_fluct.append(PHI_windows_fluct)
+                PSI_fluct.append(PSI_windows_fluct)
+
+            # r, tt, phi, TT, PHI, PSY
+            for (name, fluct) in [('r', r_fluct), ('tt', tt_fluct), ('phi', phi_fluct), ('TT', TT_fluct), ('PHI', PHI_fluct), ('PSI', PSI_fluct)]:
+                self.wham_write_timeseries(name, fluct)
+                self.wham_write_metadatafile(name)
+
 
         if not self.dG:
             with open('STORE/VBA_BND.dG', 'r') as file:
