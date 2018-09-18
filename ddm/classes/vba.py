@@ -66,10 +66,10 @@ class VbaBound(Bound):
             f.writelines(list(map(lambda x: str(x) + '\n', fluct[i])))
             f.close()
 
-    def wham_write_metadatafile(self, name):
+    def wham_write_metadatafile(self, name, nb):
         lines = []
         for i in range(len(self.ll_list)):
-            lines.append('timeseries-' + name + '-' + str(self.ll_list[i]) + ' ' + str(self.x0[i]) + ' ' + str(float(self.kappa_max[i])*self.ll_list[i]))
+            lines.append('timeseries-' + name + '-' + str(self.ll_list[i]) + ' ' + str(self.x0[nb]) + ' ' + str(float(self.kappa_max[nb])*self.ll_list[i]))
 
         file_name = 'metadatafile-' + name
         f = open(os.path.join('WHAM', file_name), 'w')
@@ -195,9 +195,9 @@ class VbaBound(Bound):
                 PSI_fluct.append(PSI_windows_fluct)
 
             # r, tt, phi, TT, PHI, PSY
-            for (name, fluct) in [('r', r_fluct), ('tt', tt_fluct), ('phi', phi_fluct), ('TT', TT_fluct), ('PHI', PHI_fluct), ('PSI', PSI_fluct)]:
+            for (name, fluct, nb) in [('r', r_fluct, 0), ('tt', tt_fluct, 1), ('phi', phi_fluct, 2), ('TT', TT_fluct, 3), ('PHI', PHI_fluct, 4), ('PSI', PSI_fluct, 5)]:
                 self.wham_write_timeseries(name, fluct)
-                self.wham_write_metadatafile(name)
+                self.wham_write_metadatafile(name, nb)
 
 
         if not self.dG:
