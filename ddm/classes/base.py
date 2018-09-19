@@ -99,19 +99,24 @@ def compute_kf_plus(kf):
 def compute_fluct(x0, kf, col, file, dihe=False):
     sum = 0
     cc = 0
-    with open(file, 'r') as f:
-        for line in f:
-            if not line.startswith('#'):
-                c = line.lstrip(' ').rstrip('\n').split(' ')[col - 1]
-                delta = float(c) - float(x0)
-                if dihe:
-                    absd = abs(delta)
-                    if absd > np.pi:
-                        delta = (2 * np.pi) - absd
-                    else:
-                        delta = absd
-                sum += delta ** 2
-                cc += 1
+    file_content = open(file, 'r')
+    file_lines = file_content.readlines()
+    file_content.close()
+    perc = 1
+    list_length = int(len(file_lines) * perc)
+    for i in range(list_length):
+        line = file_lines[i]
+        if not line.startswith('#'):
+            c = line.lstrip(' ').rstrip('\n').split(' ')[col - 1]
+            delta = float(c) - float(x0)
+            if dihe:
+                absd = abs(delta)
+                if absd > np.pi:
+                    delta = (2 * np.pi) - absd
+                else:
+                    delta = absd
+            sum += delta ** 2
+            cc += 1
     return (float(kf) / 2) * (sum / cc)
 
 

@@ -56,21 +56,25 @@ class VbaBound(Bound):
 
         self.ll_list = list(map(lambda x: float(x), self.config.get('windows', '0.001, 0.01, 0.1, 0.2, 0.5, 1.0').split(', ')))
         self.int_meth = self.config.get('int_meth', 'TI')
+        self.wham_path = self.config.get('WHAM_PATH', '')
         self.flucts = []
         self.dG = []
 
     def wham_write_timeseries(self, name, fluct):
-        for i in range(len(self.ll_list)):
-            file_name = 'timeseries-' + name + '-' + str(self.ll_list[i])
+        ll_list = [0] + self.ll_list
+        for i in range(len(ll_list)):
+            file_name = 'timeseries-' + name + '-' + str(ll_list[i])
+            perc = 1
+            list_length = int(len(fluct[i])*perc)
             f = open(os.path.join('WHAM', file_name), 'w')
-            f.writelines(list(map(lambda x: str(x) + '\n', fluct[i])))
+            f.writelines(list(map(lambda x: str(x[0]) + ' ' + str(x[1]) + '\n', fluct[i][:list_length])))
             f.close()
 
     def wham_write_metadatafile(self, name, nb):
+        ll_list = [0] + self.ll_list
         lines = []
-        for i in range(len(self.ll_list)):
-            lines.append('timeseries-' + name + '-' + str(self.ll_list[i]) + ' ' + str(self.x0[nb]) + ' ' + str(float(self.kappa_max[nb])*self.ll_list[i]))
-
+        for i in range(len(ll_list)):
+            lines.append('WHAM/timeseries-' + name + '-' + str(ll_list[i]) + ' ' + str(self.x0[nb]) + ' ' + str(float(self.kappa_max[nb])*ll_list[i]))
         file_name = 'metadatafile-' + name
         f = open(os.path.join('WHAM', file_name), 'w')
         f.writelines(list(map(lambda x: str(x) + '\n', lines)))
@@ -82,70 +86,67 @@ class VbaBound(Bound):
         if not os.path.exists('STORE'):
             os.makedirs('STORE')
 
-        if not os.path.isfile('STORE/1.0.vba'):
-            # Copy the topol file here
-            shutil.copy(os.path.join(self.prev_store_solv, 'topol-complex-solv.top'), self.directory)
+        # if not os.path.isfile('STORE/1.0.vba'):
+        # Copy the topol file here
+        shutil.copy(os.path.join(self.prev_store_solv, 'topol-complex-solv.top'), self.directory)
 
-            filedata = self.create_plumed_tmpl()
+        filedata = self.create_plumed_tmpl()
 
-            nn = 1
-            prev = os.path.join(self.prev_store, '6')
-            for ll in self.ll_list:
-                if not os.path.isfile('STORE/' + str(ll) + '.vba'):
+        prev = os.path.join(self.prev_store, '6')
+        for ll in self.ll_list:
+            if not os.path.isfile('STORE/' + str(ll) + '.vba'):
 
-                    newdata = filedata.replace('KK1', str(self.kappa_max[0] * ll))
-                    newdata = newdata.replace('KK2', str(self.kappa_max[1] * ll))
-                    newdata = newdata.replace('KK3', str(self.kappa_max[2] * ll))
-                    newdata = newdata.replace('KK4', str(self.kappa_max[3] * ll))
-                    newdata = newdata.replace('KK5', str(self.kappa_max[4] * ll))
-                    newdata = newdata.replace('KK6', str(self.kappa_max[5] * ll))
+                newdata = filedata.replace('KK1', str(self.kappa_max[0] * ll))
+                newdata = newdata.replace('KK2', str(self.kappa_max[1] * ll))
+                newdata = newdata.replace('KK3', str(self.kappa_max[2] * ll))
+                newdata = newdata.replace('KK4', str(self.kappa_max[3] * ll))
+                newdata = newdata.replace('KK5', str(self.kappa_max[4] * ll))
+                newdata = newdata.replace('KK6', str(self.kappa_max[5] * ll))
 
-                    f = open('plumed.dat', 'w')
-                    f.write(newdata)
-                    f.close()
+                f = open('plumed.dat', 'w')
+                f.write(newdata)
+                f.close()
 
-                    subprocess.call('gmx grompp -f ' + os.path.join(self.static_dir, 'PRODUCTION.mdp') + ' -c ' + prev + '.gro -t ' + prev + '.cpt -p topol-complex-solv.top -o ' + str(nn) + '.tpr -maxwarn 2',
-                                    shell=True)
-                    subprocess.call('gmx mdrun -deffnm ' + str(nn) + ' -plumed plumed.dat -v',
-                                    shell=True)
-                    check_step('VBA_rest')
-                    shutil.move('VBA_rest', 'STORE/' + str(ll) + '.vba')
-                    prev = str(nn)
-                else:
-                    prev = 'STORE/' + str(nn)
-                nn += 1
-
-            os.remove('plumed.dat')
+                subprocess.call('gmx grompp -f ' + os.path.join(self.static_dir, 'PRODUCTION.mdp') + ' -c ' + prev + '.gro -t ' + prev + '.cpt -p topol-complex-solv.top -o ' + str(ll) + '.tpr -maxwarn 2',
+                                shell=True)
+                subprocess.call('gmx mdrun -deffnm ' + str(ll) + ' -plumed plumed.dat -v',
+                                shell=True)
+                check_step('VBA_rest')
+                shutil.move('VBA_rest', 'STORE/' + str(ll) + '.vba')
+                self.store_files([str(ll) + '.gro', str(ll) + '.cpt'])
+                prev = 'STORE/' + str(ll)
+                os.remove('plumed.dat')
+            else:
+                prev = 'STORE/' + str(ll)
         clean_md_files()
 
         if self.int_meth == 'TI':
-            if not os.path.isfile('STORE/POS-ORIE.dhdl'):
-                for ll in [0] + self.ll_list:
-                    fluct = str(ll)
-                    if ll == 0:
-                        cols = [2, 3, 4, 5, 6, 7]
-                        file = '../monitor-CVs/STORE/COLVAR-rest'
-                    else:
-                        cols = [2, 4, 6, 8, 10, 12]
-                        file = 'STORE/' + str(ll) + '.vba'
-                    for col in range(6):
-                        fluct += ' ' + str(compute_fluct(self.x0[col], self.kappa_max[col], cols[col], file, dihe=self.dihe[col]))
-                    self.flucts.append(fluct)
-                f = open('STORE/POS-ORIE.dhdl', 'w')
-                f.writelines(list(map(lambda x: str(x) + '\n', self.flucts)))
-                f.close()
+            # if not os.path.isfile('STORE/POS-ORIE.dhdl'):
+            for ll in [0] + self.ll_list:
+                fluct = str(ll)
+                if ll == 0:
+                    cols = [2, 3, 4, 5, 6, 7]
+                    file = '../monitor-CVs/STORE/COLVAR-rest'
+                else:
+                    cols = [2, 4, 6, 8, 10, 12]
+                    file = 'STORE/' + str(ll) + '.vba'
+                for col in range(6):
+                    fluct += ' ' + str(compute_fluct(self.x0[col], self.kappa_max[col], cols[col], file, dihe=self.dihe[col]))
+                self.flucts.append(fluct)
+            f = open('STORE/POS-ORIE.dhdl', 'w')
+            f.writelines(list(map(lambda x: str(x) + '\n', self.flucts)))
+            f.close()
 
             if not self.flucts:
                 with open('STORE/POS-ORIE.dhdl', 'r') as file:
                     for line in file:
                         self.flucts.append(line.rstrip('\n'))
 
-            if not os.path.isfile('STORE/VBA_BND.dG'):
-                for i in range(2, 8):
-                    self.dG.append(compute_trapez(self.flucts, i))
-                f = open('STORE/VBA_BND.dG', 'w')
-                f.writelines(list(map(lambda x: str(x) + '\n', self.dG)))
-                f.close()
+            for i in range(2, 8):
+                self.dG.append(compute_trapez(self.flucts, i))
+            f = open('STORE/VBA_BND.dG', 'w')
+            f.writelines(list(map(lambda x: str(x) + '\n', self.dG)))
+            f.close()
 
         if self.int_meth == 'WHAM':
             if not os.path.isdir("WHAM"):
@@ -169,24 +170,24 @@ class VbaBound(Bound):
                         for line in f:
                             if not line.startswith('#'):
                                 c = line.lstrip(' ').rstrip('\n').split(' ')
-                                r_windows_fluct.append(float(c[1]))
-                                tt_windows_fluct.append(float(c[2]))
-                                phi_windows_fluct.append(float(c[3]))
-                                TT_windows_fluct.append(float(c[4]))
-                                PHI_windows_fluct.append(float(c[5]))
-                                PSI_windows_fluct.append(float(c[6]))
+                                r_windows_fluct.append([float(c[0]), float(c[1])])
+                                tt_windows_fluct.append([float(c[0]), float(c[2])])
+                                phi_windows_fluct.append([float(c[0]), float(c[3])])
+                                TT_windows_fluct.append([float(c[0]), float(c[4])])
+                                PHI_windows_fluct.append([float(c[0]), float(c[5])])
+                                PSI_windows_fluct.append([float(c[0]), float(c[6])])
                 else:
                     file = 'STORE/' + str(ll) + '.vba'
                     with open(file, 'r') as f:
                         for line in f:
                             if not line.startswith('#'):
                                 c = line.lstrip(' ').rstrip('\n').split(' ')
-                                r_windows_fluct.append(float(c[1]))
-                                tt_windows_fluct.append(float(c[3]))
-                                phi_windows_fluct.append(float(c[5]))
-                                TT_windows_fluct.append(float(c[7]))
-                                PHI_windows_fluct.append(float(c[9]))
-                                PSI_windows_fluct.append(float(c[11]))
+                                r_windows_fluct.append([float(c[0]), float(c[1])])
+                                tt_windows_fluct.append([float(c[0]), float(c[3])])
+                                phi_windows_fluct.append([float(c[0]), float(c[5])])
+                                TT_windows_fluct.append([float(c[0]), float(c[7])])
+                                PHI_windows_fluct.append([float(c[0]), float(c[9])])
+                                PSI_windows_fluct.append([float(c[0]), float(c[11])])
                 r_fluct.append(r_windows_fluct)
                 tt_fluct.append(tt_windows_fluct)
                 phi_fluct.append(phi_windows_fluct)
@@ -198,7 +199,25 @@ class VbaBound(Bound):
             for (name, fluct, nb) in [('r', r_fluct, 0), ('tt', tt_fluct, 1), ('phi', phi_fluct, 2), ('TT', TT_fluct, 3), ('PHI', PHI_fluct, 4), ('PSI', PSI_fluct, 5)]:
                 self.wham_write_timeseries(name, fluct)
                 self.wham_write_metadatafile(name, nb)
+                command = os.path.join(self.wham_path, 'wham')
+                mini = min([min([c[1] for c in fluct_windows]) for fluct_windows in fluct])
+                maxi = max([max([c[1] for c in fluct_windows]) for fluct_windows in fluct])
+                if name == 'r':
+                    subprocess.call([command, str(mini), str(maxi), '60', '0.0000001', str(self.temp), '0', 'WHAM/metadatafile-' + name, 'wham-outfile-' + name, '600', '123456'])
 
+                else:
+                    # subprocess.call(command)
+                    subprocess.call([command, 'Ppi', str(mini), str(maxi), '60', '0.0000001', str(self.temp), '0', 'WHAM/metadatafile-' + name, 'wham-outfile-' + name, '600', '123456'])
+
+                output = open('wham-outfile-' + name, 'r')
+                file_lines = output.readlines()
+                output.close()
+                dG = float(file_lines[-1].split()[1]) / 4.184
+                self.dG.append(dG)
+
+            f = open('STORE/VBA_BND.dG', 'w')
+            f.writelines(list(map(lambda x: str(x) + '\n', self.dG)))
+            f.close()
 
         if not self.dG:
             with open('STORE/VBA_BND.dG', 'r') as file:
@@ -210,7 +229,6 @@ class VbaBound(Bound):
 
 def compute_sym_corr(sigma_l, sigma_p, sigma_pl, temp):
     kT = c.Boltzmann * c.N_A * temp / 1000  # kJ/mol
-
     return -kT * math.log(sigma_pl / (sigma_l * sigma_p)) / 4.184  # kcal/mol
 
 
