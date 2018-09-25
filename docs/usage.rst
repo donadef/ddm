@@ -44,8 +44,8 @@ Example for a configuration file::
 
 This example contains the required parameters.
 
-- Host code and Guest code are, respectively, the code of the protein and the code of the ligand in the pdb_complex file.
-- Destination is the directory where outputs should be written.
+- Host code (**host**) and Guest code (**guest**) are, respectively, the code of the protein and the code of the ligand in the pdb_complex file.
+- Destination (**dest**) is the directory where outputs should be written.
 - Anchor points are the atoms selected to monitors the movements of the ligand in respect of the receptor. See the section :ref:`pick_reference` for more information on how to pick them.
 
   If you don't specify those value, the program will stop when they are required. You can then look at the REFERENCE.pdb to pick them, add the values to your config file and relaunch the program using the same command.
@@ -55,15 +55,15 @@ More options can be added:
 
 [main]:
 
-- ff_parameters: Force field parameters for gromacs. Default is charmm36-jul2017.ff.
-- temperature: Set the temperature for the experiment. Default is ???.
+- **ff_parameters**: Force field parameters for gromacs. Default is charmm36-jul2017.ff.
+- **temperature**: Set the temperature for the experiment. Default is ???.
 
 [vba-bound]:
 
-- windows: Factors to apply on constrain consecutively for dG vba-bound calculation. Default is 0.001, 0.01, 0.1, 0.2, 0.5, 1.0.
-- int_meth: Integration method; WHAM or TI. Default is TI.
-- WHAM_PATH: Required if WHAM has been chosen. The path for wham command. Default is ''.
+- **windows**: Factors to apply on constrain consecutively for dG vba-bound calculation. Default is 0.001, 0.01, 0.1, 0.2, 0.5, 1.0.
+- **int_meth**: Integration method; WHAM or TI. Default is TI.
+- **WHAM_PATH**: Required if WHAM has been chosen. The path for wham command. Default is ''.
 
 [vba-unbound]:
 
-- symmetry_numbers: symmetry numbers for the ligand, the receptor and the complex to compute the correction due to the symmetry. If those numbers are not provided, the symmetry correction is not computed, then equal to 0.
+- **symmetry_numbers**: symmetry numbers for the ligand, the receptor and the complex to compute the correction due to the symmetry. If those numbers are not provided, the symmetry correction is not computed, then equal to 0.
