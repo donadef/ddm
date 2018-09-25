@@ -23,20 +23,24 @@ Example for a configuration file::
 
     [main]
     # Host code
-    host=
+    host =
     # Guest code
-    guest=
+    guest =
     # Destination
-    dest=
+    dest =
 
     [pick-reference]
     # Anchor points
-    P1=
-    P2=
-    P3=
-    L1=
-    L2=
-    L3=
+    P1 =
+    P2 =
+    P3 =
+    L1 =
+    L2 =
+    L3 =
+
+    [vba-unbound]
+    # symmetry numbers to compute the symmetry correction
+    symmetry_numbers = sigma_l, sigma_p, sigma_pl
 
 This example contains the required parameters.
 
@@ -62,4 +66,4 @@ More options can be added:
 
 [vba-unbound]:
 
-- symetry
+- symmetry_numbers: symmetry numbers for the ligand, the receptor and the complex to compute the correction due to the symmetry. If those numbers are not provided, the symmetry correction is not computed, then equal to 0.
