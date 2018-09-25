@@ -36,9 +36,12 @@
   <div class="section" id="usage">
 <h1>Usage<a class="headerlink" href="#usage" title="Permalink to this headline">¶</a></h1>
 <p>To use Double Decoupling Method (DDM) in a project</p>
-<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">import ddm</span>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">from ddm.ddm import DDM</span>
+<span class="go">DDM(config_file, pdb_complex)</span>
 </pre></div>
 </div>
+<p>If you want don’t want to perform all the steps, you can use the individual modeules in ddm.classes.
+However, some steps required that others have already performed.</p>
 <p>In your terminal, use the command line</p>
 <div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$</span> ddm --config your_config_file --complex pdb_complex
 </pre></div>
@@ -75,8 +78,18 @@
 <p>More options can be added:</p>
 <p>[main]:</p>
 <ul class="simple">
-<li>ff_parameters: Force field parameters for gromacs. Default is ‘charmm36-jul2017.ff’.</li>
-<li>temperature: Set the temperature for the experiment. Default is ‘???’.</li>
+<li>ff_parameters: Force field parameters for gromacs. Default is charmm36-jul2017.ff.</li>
+<li>temperature: Set the temperature for the experiment. Default is ???.</li>
+</ul>
+<p>[vba-bound]:</p>
+<ul class="simple">
+<li>windows: Factors to apply on constrain consecutively for dG vba-bound calculation. Default is 0.001, 0.01, 0.1, 0.2, 0.5, 1.0.</li>
+<li>int_meth: Integration method; WHAM or TI. Default is TI.</li>
+<li>WHAM_PATH: Required if WHAM has been chosen. The path for wham command. Default is ‘’.</li>
+</ul>
+<p>[vba-unbound]:</p>
+<ul class="simple">
+<li>symetry</li>
 </ul>
 </div>
 
