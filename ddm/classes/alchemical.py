@@ -17,7 +17,6 @@ class AlchemicalBound(Bound):
         self.directory = os.path.join(self.dest, ORGANIZE['alchemical-bound'])
         self.static_dir = os.path.join(self.static_dir, 'alchemical-bound')
         self.prev_store = os.path.join(self.dest, ORGANIZE['vba-bound'], 'STORE')
-        self.prev_store_6 = os.path.join(self.dest, ORGANIZE['confine-bound'], 'STORE')
         self.prev_store_solv = os.path.join(self.dest, ORGANIZE['solvate-bound'], 'STORE')
 
         self.ll_list = ['00', '01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12', '13', '14', '15',
@@ -65,7 +64,7 @@ class AlchemicalBound(Bound):
                     f.write(new_prodfile_data)
                     f.close()
 
-                    subprocess.call('gmx grompp -f PRODUCTION.mdp -c ' + os.path.join(self.prev_store_6, '6.gro') + ' -t ' + os.path.join(self.prev_store_6, '6.cpt') + ' -p topol-complex-solv.top -o production.tpr -maxwarn 2',
+                    subprocess.call('gmx grompp -f PRODUCTION.mdp -c ' + os.path.join(self.prev_store, '1.0.gro') + ' -t ' + os.path.join(self.prev_store, '1.0.cpt') + ' -p topol-complex-solv.top -o production.tpr -maxwarn 2',
                                     shell=True)
                     subprocess.call('gmx mdrun -deffnm production -plumed plumed.dat -v',
                                     shell=True)

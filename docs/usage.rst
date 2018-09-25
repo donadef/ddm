@@ -6,7 +6,11 @@ To use Double Decoupling Method (DDM) in a project
 
 .. code-block:: console
 
-    import ddm
+    from ddm.ddm import DDM
+    DDM(config_file, pdb_complex)
+
+If you want don't want to perform all the steps, you can use the individual modeules in ddm.classes.
+However, some steps required that others have already performed.
 
 In your terminal, use the command line
 
@@ -55,3 +59,7 @@ More options can be added:
 - windows: Factors to apply on constrain consecutively for dG vba-bound calculation. Default is 0.001, 0.01, 0.1, 0.2, 0.5, 1.0.
 - int_meth: Integration method; WHAM or TI. Default is TI.
 - WHAM_PATH: Required if WHAM has been chosen. The path for wham command. Default is ''.
+
+[vba-unbound]:
+
+- symetry

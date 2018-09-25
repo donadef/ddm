@@ -56,7 +56,6 @@ class ConfineBound(Confine):
         super(ConfineBound, self).__init__(config, guest)
         self.directory = os.path.join(self.dest, ORGANIZE['confine-bound'])
         self.static_dir = os.path.join(self.static_dir, 'confine-bound')
-        self.prev_store = os.path.join(self.dest, ORGANIZE['monitor-CVs'], 'STORE')
         self.prev_store_ref = os.path.join(self.dest, ORGANIZE['pick-reference'], 'STORE')
         self.prev_store_solv = os.path.join(self.dest, ORGANIZE['solvate-bound'], 'STORE')
 
@@ -180,7 +179,6 @@ class ConfineUnbound(Confine):
         super(ConfineUnbound, self).__init__(config, guest)
         self.directory = os.path.join(self.dest, ORGANIZE['confine-unbound'])
         self.static_dir = os.path.join(self.static_dir, 'confine-unbound')
-        self.prev_store = os.path.join(self.dest, ORGANIZE['monitor-CVs'], 'STORE')
         self.prev_store_ref = os.path.join(self.dest, ORGANIZE['pick-reference'], 'STORE')
         self.prev_store_solv = os.path.join(self.dest, ORGANIZE['solvate-unbound'], 'STORE')
 

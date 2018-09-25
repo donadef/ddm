@@ -79,33 +79,34 @@ class DDM:
         mon.run()
 
         # restrain LIGAND in BOUND state
-        cf = ConfineBound(self.config, self.guest)
-        dG_CONF_BND = cf.run()
-        print('dG_CONF_BND', dG_CONF_BND)
+        cf_bound = ConfineBound(self.config, self.guest)
+        dG_CONF_BND = cf_bound.run()
 
-        vba_bound = VbaBound(self.config, self.guest, mon.x0, mon.kappa_max, cf.krms_max)
+        vba_bound = VbaBound(self.config, self.guest, mon.x0, mon.kappa_max, cf_bound.krms_max)
         dG_VBA_BND = vba_bound.run()
-        print('dG_VBA_BND', dG_VBA_BND)
 
-        # # decouple LIGAND in BOUND state
-        # alch_bound = AlchemicalBound(self.config, self.guest, mon.x0, mon.kappa_max, cf.krms_max)
-        # dG_ALCH_BND = alch_bound.run()
-        # print('dG_ALCH_BND', dG_ALCH_BND)
-        #
-        # # release LIGAND in UNBOUND state
-        # cf_unbound = ConfineUnbound(self.config, self.guest, cf.krms_max)
-        # dG_CONF_UB = cf_unbound.run()
-        # print('dG_CONF_UB', dG_CONF_UB)
-        #
-        # vba_unbound = VbaUnbound(self.config, mon.kappa_max)
-        # dG_VBA_UB, sym_corr = vba_unbound.run()
-        # print('dG_VBA_UB', dG_VBA_UB, 'sym_corr', sym_corr)
-        #
-        # # recouple LIGAND in UNBOUND state
-        # alch_unbound = AlchemicalUnbound(self.config, self.guest)
-        # dG_ALCH_UD = alch_unbound.run()
-        # print('dG_ALCH_UD', dG_ALCH_UD)
-        #
-        # all_contributions = dG_CONF_BND + dG_VBA_BND + dG_ALCH_BND + list(map(lambda x: -x, dG_CONF_UB)) + dG_VBA_UB + sym_corr + list(map(lambda x: -x, dG_ALCH_UD))
-        # total = np.sum(all_contributions)
-        # print('Total: ', total)
+        # decouple LIGAND in BOUND state
+        alch_bound = AlchemicalBound(self.config, self.guest, mon.x0, mon.kappa_max, cf_bound.krms_max)
+        dG_ALCH_BND = alch_bound.run()
+
+        # release LIGAND in UNBOUND state
+        cf_unbound = ConfineUnbound(self.config, self.guest, cf_bound.krms_max)
+        dG_CONF_UB = cf_unbound.run()
+
+        vba_unbound = VbaUnbound(self.config, mon.kappa_max)
+        dG_VBA_UB, sym_corr = vba_unbound.run()
+
+        # recouple LIGAND in UNBOUND state
+        alch_unbound = AlchemicalUnbound(self.config, self.guest)
+        dG_ALCH_UD = alch_unbound.run()
+
+        print('dG_CONF_BND', dG_CONF_BND)
+        print('dG_VBA_BND', dG_VBA_BND)
+        print('dG_ALCH_BND', dG_ALCH_BND)
+        print('dG_CONF_UB', list(map(lambda x: -x, dG_CONF_UB)))
+        print('dG_VBA_UB', dG_VBA_UB, 'sym_corr', sym_corr)
+        print('dG_ALCH_UD', list(map(lambda x: -x, dG_ALCH_UD)))
+
+        all_contributions = dG_CONF_BND + dG_VBA_BND + dG_ALCH_BND + list(map(lambda x: -x, dG_CONF_UB)) + dG_VBA_UB + sym_corr + list(map(lambda x: -x, dG_ALCH_UD))
+        total = np.sum(all_contributions)
+        print('Total: ', total)

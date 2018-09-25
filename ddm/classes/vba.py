@@ -238,6 +238,13 @@ class VbaUnbound(DDMClass):
         self.directory = os.path.join(self.dest, ORGANIZE['vba-unbound'])
         self.prev_store = os.path.join(self.dest, ORGANIZE['vba-bound'], 'STORE')
 
+        try:
+            self.config = self.config['vba-unbound']
+        except KeyError:
+            self.config = self.config['main']
+
+        self.sym_numbers = list(map(lambda x: float(x), self.config.get('symmetry_numbers', '1000, 1000, 1000').split(', ')))
+
         self.kappa = kappa_max
         self.dG = []
         self.sym_corr = []
@@ -263,7 +270,11 @@ class VbaUnbound(DDMClass):
                     self.dG.append(float(line.rstrip('\n')))
 
         if not os.path.isfile('STORE/sym_corr.dat'):
-            self.sym_corr.append(compute_sym_corr(1, 14, 1, self.temp))
+            if self.sym_numbers == [1000, 1000, 1000]:
+                print("Vba unbound info : enable to compute symmetry correction, no symmetry number provided.")
+                self.sym_corr = 0
+            else:
+                self.sym_corr.append(compute_sym_corr(1, 14, 1, self.temp))
             f = open('STORE/sym_corr.dat', 'w')
             f.writelines(list(map(lambda x: str(x) + '\n', self.sym_corr)))
             f.close()

@@ -1,7 +1,8 @@
 ; Run parameters
 integrator      	= md            	; leap-frog integrator
 ;nsteps                  = 500000                ; total number of steps
-nsteps                  = 1000000                ; total number of steps
+;nsteps                  = 1000000                ; total number of steps
+nsteps                  = 5000000                ; total number of steps
 dt                  	= 0.002             	; 2 fs for timestep
 continuation	        = yes        		; continue a previous dynamics?
 ; Output control

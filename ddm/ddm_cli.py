@@ -2,7 +2,7 @@
 
 """Console script for ddm."""
 import click
-from ddm.ddm_run import DDM
+from ddm.ddm import DDM
 
 
 @click.command()
@@ -22,7 +22,6 @@ def main(config, complex):
     ddm = DDM(config, complex)
     ddm.perform_ddm()
     return 0
-
 
 if __name__ == "__main__":
     main()
