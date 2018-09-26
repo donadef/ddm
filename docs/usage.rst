@@ -7,9 +7,10 @@ To use Double Decoupling Method (DDM) in a project
 .. code-block:: console
 
     from ddm.ddm import DDM
-    DDM(config_file, pdb_complex)
+    ddm = DDM(config_file, pdb_complex)
+    ddm.run()
 
-If you want don't want to perform all the steps, you can use the individual modeules in ddm.classes.
+If you want don't want to perform all the steps, you can use the individual modules in ddm.classes.
 However, some steps required that others have already been performed (see :ref:`diagram`).
 
 In your terminal, use the command line
