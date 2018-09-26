@@ -10,7 +10,7 @@ To use Double Decoupling Method (DDM) in a project
     DDM(config_file, pdb_complex)
 
 If you want don't want to perform all the steps, you can use the individual modeules in ddm.classes.
-However, some steps required that others have already performed (see :ref:`diagram`).
+However, some steps required that others have already been performed (see :ref:`diagram`).
 
 In your terminal, use the command line
 
@@ -47,8 +47,8 @@ This example contains the required parameters.
 - Host code (**host**) and Guest code (**guest**) are, respectively, the code of the protein and the code of the ligand in the pdb_complex file.
 - Destination (**dest**) is the directory where outputs should be written.
 - Anchor points are the atoms selected to monitors the movements of the ligand in respect of the receptor. See the section :ref:`pick_reference` for more information on how to pick them.
-
-  If you don't specify those value, the program will stop when they are required. You can then look at the REFERENCE.pdb to pick them, add the values to your config file and relaunch the program using the same command.
+    If you don't specify those value, the program will stop when they are required. You can then look at the REFERENCE.pdb to pick them, add the values to your config file and relaunch the program using the same command.
+- **symmetry_numbers** for the ligand, the receptor and the complex to compute the correction due to the symmetry. If those numbers are not provided, the symmetry correction is not computed, then is equal to 0.
 
 
 More options can be added:
@@ -64,6 +64,3 @@ More options can be added:
 - **int_meth**: Integration method; WHAM or TI. Default is TI.
 - **WHAM_PATH**: Required if WHAM has been chosen. The path for wham command. Default is ''.
 
-[vba-unbound]:
-
-- **symmetry_numbers**: symmetry numbers for the ligand, the receptor and the complex to compute the correction due to the symmetry. If those numbers are not provided, the symmetry correction is not computed, then equal to 0.
