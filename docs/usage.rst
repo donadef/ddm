@@ -10,7 +10,7 @@ To use Double Decoupling Method (DDM) in a project
     DDM(config_file, pdb_complex)
 
 If you want don't want to perform all the steps, you can use the individual modeules in ddm.classes.
-However, some steps required that others have already performed.
+However, some steps required that others have already performed (see :ref:`diagram`).
 
 In your terminal, use the command line
 
