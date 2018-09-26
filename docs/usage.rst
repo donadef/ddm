@@ -57,7 +57,7 @@ More options can be added:
 [main]:
 
 - **ff_parameters**: Force field parameters for gromacs. Default is charmm36-jul2017.ff.
-- **temperature**: Set the temperature for the experiment. Default is ???.
+- **temperature**: Set the temperature for the experiment. Default is 300.
 
 [vba-bound]:
 
