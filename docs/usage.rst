@@ -59,8 +59,20 @@ More options can be added:
 - **ff_parameters**: Force field parameters for gromacs. Default is charmm36-jul2017.ff.
 - **temperature**: Set the temperature for the experiment. Default is 300.
 
-[vba-bound]:
+[monitor-CVs]
+# Constrain on distance, angles, dihedrals.
+- **rr**: restrain on r distance
+- **tt**: restrain on theta angle
+- **phi**:
+- **TT**:
+- **PHI**:
+- **PSI**:
 
+[confine-bound]
+# constrain on rms
+- **rms**:
+
+[vba-bound]:
 - **windows**: Factors to apply on constrain consecutively for dG vba-bound calculation. Default is 0.001, 0.01, 0.1, 0.2, 0.5, 1.0.
 - **int_meth**: Integration method; WHAM or TI. Default is TI.
 - **WHAM_PATH**: Required if WHAM has been chosen. The path for wham command. Default is ''.
