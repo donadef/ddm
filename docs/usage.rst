@@ -69,9 +69,11 @@ More options can be added:
 - **PSI**: constrain on PSI dihedral.
 
 [confine-bound]
+
 - **rms**: constrain on rms.
 
 [vba-bound]:
+
 - **windows**: Factors to apply on constrain consecutively for dG vba-bound calculation. Default is 0.001, 0.01, 0.1, 0.2, 0.5, 1.0.
 - **int_meth**: Integration method; WHAM or TI. Default is TI.
 - **WHAM_PATH**: Required if WHAM has been chosen. The path for wham command. Default is ''.
