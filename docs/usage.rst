@@ -61,7 +61,6 @@ More options can be added:
 
 [monitor-CVs]:
 
-# Constrain on distance, angles, dihedrals.
 - **rr**: constrain on r distance.
 - **tt**: constrain on theta angle.
 - **phi**: constrain on phi dihedral.
