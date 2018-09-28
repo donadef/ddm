@@ -13,7 +13,7 @@ You can either clone the public repository:
 
 .. code-block:: console
 
-    $ git clone git://github.com/donadef/ddm
+    $ git clone git@github.com:IFMlab/DDM.git
 
 
 Once you have a copy of the source (it is recommanded to create a virtual environment, see _`Handle virtual environmement` for more infos), you can install it with:
@@ -30,7 +30,7 @@ If you want to be able to launch calculation using only the 'ddm' command, use:
     $ pip install --editable .
 
 
-.. _Github repo: https://github.com/donadef/ddm
+.. _Github repo: https://github.com/IFMlab/DDM
 
 
 Handle virtual environment
